@@ -5,6 +5,7 @@ interface UserState {
   user: {
     email: string;
     username: string;
+    profilePicture?: string;
   } | null;
 }
 

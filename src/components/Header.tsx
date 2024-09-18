@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 import { Sun, Moon } from 'lucide-react';
@@ -15,10 +15,40 @@ const Header: React.FC = () => {
   const isAuthenticated = useSelector(
     (state: RootState) => state.user.isAuthenticated
   );
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const user = useSelector((state: RootState) => state.user.user);
+  const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const handleLogout = () => {
     dispatch(logout());
   };
+
+  const toggleDropdown = () => {
+    if (isDropdownOpen) {
+      setIsDropdownOpen(false);
+    } else {
+      setIsDropdownOpen(true);
+    }
+  };
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node)
+    ) {
+      setIsDropdownOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    // Add event listener for clicks outside of dropdown
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      // Clean up event listener on component unmount
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <motion.header
@@ -68,13 +98,76 @@ const Header: React.FC = () => {
             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
           </button>
           {isAuthenticated ? (
-            <button
-              className="px-4 py-2 text-sm font-medium hover:bg-opacity-10 hover:bg-accent-color rounded-md transition-colors"
-              style={{ color: 'var(--text-primary)' }}
-              onClick={handleLogout}
-            >
-              Log Out
-            </button>
+            <div className="relative">
+              <button
+                onClick={toggleDropdown}
+                className="relative flex items-center space-x-2 focus:outline-none"
+              >
+                <img
+                  src={user?.profilePicture || 'https://via.placeholder.com/40'}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                <span
+                  className="text-sm font-medium"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  {user?.username}
+                </span>
+              </button>
+              {isDropdownOpen && (
+                <div
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-20"
+                  style={{ backgroundColor: 'var(--bg-secondary)' }}
+                  ref={dropdownRef}
+                >
+                  <ul className="py-2">
+                    <li>
+                      <button
+                        onClick={() => {
+                          navigate('/profile');
+                          setIsDropdownOpen(false);
+                        }}
+                        className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+                        style={{
+                          color: 'var(--text-primary)',
+                          backgroundColor: 'transparent',
+                        }}
+                        onMouseOver={(e) =>
+                          (e.currentTarget.style.backgroundColor =
+                            'var(--hover-bg)')
+                        }
+                        onMouseOut={(e) =>
+                          (e.currentTarget.style.backgroundColor =
+                            'transparent')
+                        }
+                      >
+                        Profile
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full px-4 py-2 text-left text-sm text-red-600"
+                        style={{
+                          backgroundColor: 'transparent',
+                        }}
+                        onMouseOver={(e) =>
+                          (e.currentTarget.style.backgroundColor =
+                            'var(--hover-bg)')
+                        }
+                        onMouseOut={(e) =>
+                          (e.currentTarget.style.backgroundColor =
+                            'transparent')
+                        }
+                      >
+                        Log Out
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
           ) : (
             <div>
               <button
