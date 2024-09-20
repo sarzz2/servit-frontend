@@ -51,7 +51,7 @@ const Login: React.FC = () => {
         })
       );
       dispatch(closeModal());
-      navigate('/user');
+      navigate('/profile');
     } catch (error) {
       setSnackbar({
         message: 'Invalid username password.',

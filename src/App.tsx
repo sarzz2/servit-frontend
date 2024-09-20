@@ -3,12 +3,12 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
-import UserPage from './pages/UserPage';
 import AuthPopup from './components/AuthPopup';
 import { useTheme } from './contexts/ThemeContext';
 import { useDispatch } from 'react-redux';
 import { setUser } from './slices/userSlice';
 import axiosInstance from './utils/axiosInstance';
+import Profile from './pages/Profile';
 
 const App: React.FC = () => {
   const { theme } = useTheme();
@@ -39,13 +39,13 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className={`flex flex-col min-h-screen ${theme}`}>
+      <div className={`flex flex-col min-h-screen ${theme} `}>
         <AuthPopup />
         <Header />
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/user" element={<UserPage />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
         <Footer />

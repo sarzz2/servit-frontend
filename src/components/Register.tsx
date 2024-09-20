@@ -52,7 +52,7 @@ const Register: React.FC = () => {
       );
       setSnackbar({ message: 'Registration successful!', type: 'success' });
       dispatch(closeModal());
-      navigate('/user');
+      navigate('/profile');
     } catch (error) {
       setSnackbar({
         message: 'Registration failed. Please try again.',
