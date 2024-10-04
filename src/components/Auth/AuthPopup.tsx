@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../Store';
-import { closeModal } from '../slices/authModalSlice';
+import { RootState } from '../../Store';
+import { closeModal } from '../../slices/authModalSlice';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 import Login from './Login';
 import Register from './Register';

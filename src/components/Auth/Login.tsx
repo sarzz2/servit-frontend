@@ -3,28 +3,26 @@ import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { closeModal } from '../slices/authModalSlice';
-import axiosInstance from '../utils/axiosInstance';
-import Snackbar from './Snackbar';
+import { closeModal } from '../../slices/authModalSlice';
+import axiosInstance from '../../utils/axiosInstance';
+import Snackbar from '../Snackbar';
 import { useNavigate } from 'react-router-dom';
-import { setUser } from '../slices/userSlice';
+import { setUser } from '../../slices/userSlice';
 
-interface RegisterFormValues {
+interface LoginFormValues {
   username: string;
-  email: string;
   password: string;
 }
 
-const signupSchema = yup.object().shape({
+const loginSchema = yup.object().shape({
   username: yup.string().required('Username is required'),
-  email: yup.string().email('Invalid email').required('Email is required'),
   password: yup
     .string()
     .min(6, 'Password must be at least 6 characters')
     .required('Password is required'),
 });
 
-const Register: React.FC = () => {
+const Login: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [snackbar, setSnackbar] = useState<{
@@ -36,14 +34,16 @@ const Register: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterFormValues>({ resolver: yupResolver(signupSchema) });
+  } = useForm<LoginFormValues>({ resolver: yupResolver(loginSchema) });
 
-  const onSubmit = async (data: RegisterFormValues) => {
+  const onSubmit = async (data: LoginFormValues) => {
     try {
-      const response = await axiosInstance.post('/users/register', data);
+      const response = await axiosInstance.post('/users/login', data);
       const token = response.data.access_token;
 
+      // Store token in localStorage
       localStorage.setItem('access_token', token);
+      setSnackbar({ message: 'Login successful!', type: 'success' });
       dispatch(
         setUser({
           email: response.data.email,
@@ -52,12 +52,11 @@ const Register: React.FC = () => {
           profilePicture: response.data.profile_picture_url,
         })
       );
-      setSnackbar({ message: 'Registration successful!', type: 'success' });
       dispatch(closeModal());
       navigate('/profile');
     } catch (error) {
       setSnackbar({
-        message: 'Registration failed. Please try again.',
+        message: 'Invalid username password.',
         type: 'error',
       });
     }
@@ -76,7 +75,7 @@ const Register: React.FC = () => {
         className="text-xl font-bold mb-4"
         style={{ color: 'var(--text-primary)' }}
       >
-        Sign Up
+        Login
       </h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
@@ -103,25 +102,6 @@ const Register: React.FC = () => {
             className="block text-sm font-medium"
             style={{ color: 'var(--text-primary)' }}
           >
-            Email
-          </label>
-          <input
-            type="email"
-            className={`w-full p-2 border rounded ${
-              errors.email ? 'border-red-500' : 'border-gray-300'
-            }`}
-            style={{ color: '#1f2937' }}
-            {...register('email')}
-          />
-          {errors.email && (
-            <p className="text-red-500 text-sm">{errors.email.message}</p>
-          )}
-        </div>
-        <div>
-          <label
-            className="block text-sm font-medium"
-            style={{ color: 'var(--text-primary)' }}
-          >
             Password
           </label>
           <input
@@ -140,11 +120,11 @@ const Register: React.FC = () => {
           type="submit"
           className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
         >
-          Sign Up
+          Login
         </button>
       </form>
     </div>
   );
 };
 
-export default Register;
+export default Login;

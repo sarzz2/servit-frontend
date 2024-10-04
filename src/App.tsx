@@ -8,7 +8,7 @@ import {
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
-import AuthPopup from './components/AuthPopup';
+import AuthPopup from './components/Auth/AuthPopup';
 import { useTheme } from './contexts/ThemeContext';
 import { useDispatch } from 'react-redux';
 import { setUser } from './slices/userSlice';
