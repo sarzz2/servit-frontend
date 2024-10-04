@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axiosInstance from '../utils/axiosInstance';
-import Modal from './Modal'; // Import the Modal component
+import axiosInstance from '../../utils/axiosInstance';
+import Modal from './Modal';
 
 interface CategoriesAndChannelsProps {
   server: any;

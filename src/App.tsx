@@ -16,7 +16,7 @@ import axiosInstance from './utils/axiosInstance';
 import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import UserHome from './pages/UserHome';
-import ServerSettings from './components/ServerSettings';
+import ServerSettings from './components/ServerSettings/ServerSettings';
 
 const App: React.FC = () => {
   const { theme } = useTheme();

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import SaveCancelButtons from './SaveCancelButtons';
+import SaveCancelButtons from '../SaveCancelButtons';
+import axiosInstance from '../../utils/axiosInstance';
+import Snackbar from '../Snackbar';
 
 interface OverviewProps {
   server: any;
@@ -10,6 +12,10 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
   const [initialServer, setInitialServer] = useState<any>(server);
   const [hasChanges, setHasChanges] = useState<boolean>(false);
   const [tempServer, setTempServer] = useState<any>(server);
+  const [snackbar, setSnackbar] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
 
   useEffect(() => {
     setInitialServer(server);
@@ -24,9 +30,28 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
   }, [tempServer, initialServer]);
 
   const handleSave = () => {
-    setServer(tempServer);
-    setInitialServer(tempServer);
-    setHasChanges(false);
+    axiosInstance
+      .patch(`/servers/${server.id}`, {
+        name: tempServer.name,
+        description: tempServer.description,
+        is_public: tempServer.is_public,
+      })
+      .then(() => {
+        setSnackbar({
+          message: 'Server updated successfully!',
+          type: 'success',
+        });
+        setServer(tempServer);
+        setInitialServer(tempServer);
+        setHasChanges(false);
+      })
+      .catch((error) => {
+        setSnackbar({
+          message: 'Server could not be updated! Please try again',
+          type: 'error',
+        });
+        console.error('Error updating server:', error);
+      });
   };
 
   const handleCancel = () => {
@@ -36,6 +61,13 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
 
   return (
     <div className="bg-primary dark:bg-dark-primary rounded-lg p-6">
+      {snackbar && (
+        <Snackbar
+          message={snackbar.message}
+          type={snackbar.type}
+          onClose={() => setSnackbar(null)}
+        />
+      )}
       <div className="flex items-center mb-6">
         <div className="relative">
           <img

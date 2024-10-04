@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axiosInstance from '../utils/axiosInstance';
+import axiosInstance from '../../utils/axiosInstance';
 import Overview from './Overview';
 import CategoriesAndChannels from './CategoriesAndChannels';
 
@@ -86,7 +86,6 @@ const ServerSettings: React.FC = () => {
           </button>
         </div>
 
-        {/* Render Content Based on Selected Tab */}
         {renderContent()}
       </div>
     </div>
