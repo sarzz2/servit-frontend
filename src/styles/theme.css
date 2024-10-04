@@ -1,9 +1,10 @@
 :root {
   --bg-primary: #ffffff;
   --bg-secondary: #f3f4f6;
+  --bg-tertiary: #e5e7eb;
   --text-primary: #1f2937;
   --text-secondary: #4b5563;
-  --button-primary: #ff784b;
+  --button-primary: #3049ed;
   --button-hover: #ff5722;
   --accent-color: #3b82f6;
   --hover-bg: #e5e7eb;
@@ -12,6 +13,7 @@
 [data-theme='dark'] {
   --bg-primary: #131313;
   --bg-secondary: #2c2c2c;
+  --bg-tertiary: #1f1f1f;
   --box-primary: #1f1f1f;
   --text-primary: #f9fafb;
   --text-secondary: #d1d5db;
@@ -33,6 +35,6 @@ button {
   transition: background-color 0.3s ease;
 }
 
-.button-hover:hover {
+.button-hover–:hover {
   background-color: var(--button-hover) !important;
 }

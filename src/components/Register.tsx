@@ -48,6 +48,8 @@ const Register: React.FC = () => {
         setUser({
           email: response.data.email,
           username: response.data.username,
+          id: response.data.id,
+          profilePicture: response.data.profile_picture_url,
         })
       );
       setSnackbar({ message: 'Registration successful!', type: 'success' });

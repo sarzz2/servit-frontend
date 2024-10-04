@@ -23,7 +23,7 @@ const Snackbar: React.FC<SnackbarProps> = ({ message, type, onClose }) => {
 
   return (
     <div
-      className={`fixed top-20 right-4 p-4 rounded shadow-lg text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}
+      className={`fixed top-20 z-50 right-4 p-4 rounded shadow-lg text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}
     >
       {message}
     </div>

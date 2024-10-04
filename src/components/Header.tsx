@@ -55,7 +55,7 @@ const Header: React.FC = () => {
       initial={{ opacity: 0, y: -50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="sticky top-0 z-50 bg-opacity-90 backdrop-blur-md "
+      className="sticky top-0 z-20 bg-opacity-90 backdrop-blur-md "
       style={{ backgroundColor: 'var(--bg-primary, rgba(255, 255, 255, 0.9))' }}
     >
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
