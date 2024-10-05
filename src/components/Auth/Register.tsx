@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { closeModal } from '../../slices/authModalSlice';
 import axiosInstance from '../../utils/axiosInstance';
-import Snackbar from '../Snackbar';
+import { useSnackbar } from '../Snackbar';
 import { useNavigate } from 'react-router-dom';
 import { setUser } from '../../slices/userSlice';
 
@@ -27,10 +26,7 @@ const signupSchema = yup.object().shape({
 const Register: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [snackbar, setSnackbar] = useState<{
-    message: string;
-    type: 'success' | 'error';
-  } | null>(null);
+  const { showSnackbar } = useSnackbar();
 
   const {
     register,
@@ -52,26 +48,16 @@ const Register: React.FC = () => {
           profilePicture: response.data.profile_picture_url,
         })
       );
-      setSnackbar({ message: 'Registration successful!', type: 'success' });
+      showSnackbar('Registration successful!', 'success');
       dispatch(closeModal());
       navigate('/profile');
     } catch (error) {
-      setSnackbar({
-        message: 'Registration failed. Please try again.',
-        type: 'error',
-      });
+      showSnackbar('Registration failed. Please try again.', 'error');
     }
   };
 
   return (
     <div className="w-1/2 p-4">
-      {snackbar && (
-        <Snackbar
-          message={snackbar.message}
-          type={snackbar.type}
-          onClose={() => setSnackbar(null)}
-        />
-      )}
       <h2
         className="text-xl font-bold mb-4"
         style={{ color: 'var(--text-primary)' }}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import SaveCancelButtons from '../SaveCancelButtons';
 import axiosInstance from '../../utils/axiosInstance';
-import Snackbar from '../Snackbar';
+import { useSnackbar } from '../Snackbar';
 
 interface OverviewProps {
   server: any;
@@ -12,10 +12,7 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
   const [initialServer, setInitialServer] = useState<any>(server);
   const [hasChanges, setHasChanges] = useState<boolean>(false);
   const [tempServer, setTempServer] = useState<any>(server);
-  const [snackbar, setSnackbar] = useState<{
-    message: string;
-    type: 'success' | 'error';
-  } | null>(null);
+  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
     setInitialServer(server);
@@ -37,19 +34,15 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
         is_public: tempServer.is_public,
       })
       .then(() => {
-        setSnackbar({
-          message: 'Server updated successfully!',
-          type: 'success',
-        });
+        showSnackbar('Server updated successfully!', 'success');
+
         setServer(tempServer);
         setInitialServer(tempServer);
         setHasChanges(false);
       })
       .catch((error) => {
-        setSnackbar({
-          message: 'Server could not be updated! Please try again',
-          type: 'error',
-        });
+        showSnackbar('Server could not be updated! Please try again', 'error');
+
         console.error('Error updating server:', error);
       });
   };
@@ -61,13 +54,6 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
 
   return (
     <div className="bg-primary dark:bg-dark-primary rounded-lg p-6">
-      {snackbar && (
-        <Snackbar
-          message={snackbar.message}
-          type={snackbar.type}
-          onClose={() => setSnackbar(null)}
-        />
-      )}
       <div className="flex items-center mb-6">
         <div className="relative">
           <img
@@ -109,7 +95,7 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
             onChange={(e) =>
               setTempServer({ ...tempServer, name: e.target.value })
             }
-            className="w-full bg-secondary dark:bg-dark-secondary border-none border-gray-300 dark:border-dark-border p-2 rounded-lg"
+            className="w-full bg-secondary dark:bg-dark-secondary outline-none border-gray-300 dark:border-dark-border p-2 rounded-lg"
             placeholder="Enter server name"
           />
         </div>
@@ -124,7 +110,7 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
             onChange={(e) =>
               setTempServer({ ...tempServer, description: e.target.value })
             }
-            className="w-full bg-secondary dark:bg-dark-secondary border-none border-gray-300 dark:border-dark-border p-2 rounded-lg"
+            className="w-full bg-secondary dark:bg-dark-secondary outline-none border-gray-300 dark:border-dark-border p-2 rounded-lg"
             placeholder="Enter server description"
           />
         </div>

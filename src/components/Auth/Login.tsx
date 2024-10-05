@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { closeModal } from '../../slices/authModalSlice';
 import axiosInstance from '../../utils/axiosInstance';
-import Snackbar from '../Snackbar';
+import { useSnackbar } from '../Snackbar';
 import { useNavigate } from 'react-router-dom';
 import { setUser } from '../../slices/userSlice';
 
@@ -25,10 +24,7 @@ const loginSchema = yup.object().shape({
 const Login: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [snackbar, setSnackbar] = useState<{
-    message: string;
-    type: 'success' | 'error';
-  } | null>(null);
+  const { showSnackbar } = useSnackbar();
 
   const {
     register,
@@ -43,7 +39,7 @@ const Login: React.FC = () => {
 
       // Store token in localStorage
       localStorage.setItem('access_token', token);
-      setSnackbar({ message: 'Login successful!', type: 'success' });
+      showSnackbar('Login successful!', 'success');
       dispatch(
         setUser({
           email: response.data.email,
@@ -55,22 +51,12 @@ const Login: React.FC = () => {
       dispatch(closeModal());
       navigate('/profile');
     } catch (error) {
-      setSnackbar({
-        message: 'Invalid username password.',
-        type: 'error',
-      });
+      showSnackbar('Invalid username password.', 'error');
     }
   };
 
   return (
     <div className="w-1/2 p-4">
-      {snackbar && (
-        <Snackbar
-          message={snackbar.message}
-          type={snackbar.type}
-          onClose={() => setSnackbar(null)}
-        />
-      )}
       <h2
         className="text-xl font-bold mb-4"
         style={{ color: 'var(--text-primary)' }}

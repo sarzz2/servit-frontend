@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../utils/axiosInstance';
-import Snackbar from './Snackbar';
+import { useSnackbar } from './Snackbar';
 import { RootState } from '../Store';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectServer } from '../slices/selectedServerSlice';
@@ -13,10 +13,8 @@ const ServerList: React.FC = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [isDirectMessageOpen, setDirectMessageOpen] = useState(false);
   const [serverName, setServerName] = useState('');
-  const [snackbar, setSnackbar] = useState<{
-    message: string;
-    type: 'success' | 'error';
-  } | null>(null);
+  const { showSnackbar } = useSnackbar();
+
   const selectedServer = useSelector(
     (state: RootState) => state.selectedServer
   );
@@ -31,7 +29,7 @@ const ServerList: React.FC = () => {
       })
       .catch((error) => {
         console.log(error);
-        setSnackbar({ message: 'Error loading servers', type: 'error' });
+        showSnackbar('Error loading servers', 'error');
       });
   }, []);
 
@@ -42,15 +40,12 @@ const ServerList: React.FC = () => {
         setServers((prev) => [...prev, response.data.server]);
         setModalOpen(false);
         setServerName('');
-        setSnackbar({
-          message: 'Server created successfully!',
-          type: 'success',
-        });
+        showSnackbar('Server created successfully!', 'success');
       })
       .catch((error) => {
         const errorMessage =
           error.response?.data?.detail[0]?.msg || 'Error creating server';
-        setSnackbar({ message: errorMessage, type: 'error' });
+        showSnackbar(errorMessage, 'error');
       });
   };
 
@@ -66,20 +61,13 @@ const ServerList: React.FC = () => {
       })
       .catch((error) => {
         console.error(error);
-        setSnackbar({ message: 'Error loading permissions', type: 'error' });
+        showSnackbar('Error loading permissions', 'error');
       });
   };
 
   return (
     <div className="flex">
       <div className="w-16 h-screen flex flex-col items-center py-4 bg-secondary dark:bg-dark-secondary">
-        {snackbar && (
-          <Snackbar
-            message={snackbar.message}
-            type={snackbar.type}
-            onClose={() => setSnackbar(null)}
-          />
-        )}
         <button
           className="w-12 h-12 mt-2 rounded-full flex items-center justify-center bg-bg-secondary dark:bg-dark-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover"
           onClick={() => {

@@ -17,6 +17,7 @@ import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import UserHome from './pages/UserHome';
 import ServerSettings from './components/ServerSettings/ServerSettings';
+import { SnackbarProvider } from './components/Snackbar';
 
 const App: React.FC = () => {
   const { theme } = useTheme();
@@ -56,19 +57,21 @@ const App: React.FC = () => {
       {location.pathname === '/' && <Header />}
 
       <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/home" element={<UserHome />} />
-          <Route path="/settings/:serverId" element={<ServerSettings />} />
-        </Routes>
+        <SnackbarProvider>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/home" element={<UserHome />} />
+            <Route path="/settings/:serverId" element={<ServerSettings />} />
+          </Routes>
+        </SnackbarProvider>
       </main>
 
       {location.pathname !== '/home' && <Footer />}
