@@ -15,10 +15,12 @@ import { setUser } from './slices/userSlice';
 import axiosInstance from './utils/axiosInstance';
 import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
-import UserHome from './pages/UserHome';
 import ServerSettings from './components/ServerSettings/ServerSettings';
 import { SnackbarProvider } from './components/Snackbar';
 import PermissionRoute from './components/PermissionRoute';
+import ServerDetail from './components/Server/ServerDetail';
+import DirectMessage from './components/DirectMessage/DirectMessage';
+import ServerLayout from './pages/ServerLayout';
 
 const App: React.FC = () => {
   const { theme } = useTheme();
@@ -55,7 +57,6 @@ const App: React.FC = () => {
       <SnackbarProvider>
         <AuthPopup />
 
-        {/* Only render Header if not on the home route */}
         {location.pathname === '/' && <Header />}
 
         <main className="flex-grow">
@@ -76,10 +77,13 @@ const App: React.FC = () => {
               path="/home"
               element={
                 <ProtectedRoute>
-                  <UserHome />
+                  <ServerLayout />
                 </ProtectedRoute>
               }
-            />
+            >
+              <Route path="direct" element={<DirectMessage />} />
+              <Route path=":serverId" element={<ServerDetail />} />
+            </Route>
 
             <Route
               path="/settings/:serverId"

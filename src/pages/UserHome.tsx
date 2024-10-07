@@ -1,4 +1,4 @@
-import ServerList from '../components/ServerList';
+import ServerList from '../components/Server/ServerList';
 
 const UserHome: React.FC = () => {
   return (

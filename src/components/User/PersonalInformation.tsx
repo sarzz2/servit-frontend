@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '../Store';
+import { RootState } from '../../Store';
 
 const PersonalInformation: React.FC = () => {
   const user = useSelector((state: RootState) => state.user.user);
