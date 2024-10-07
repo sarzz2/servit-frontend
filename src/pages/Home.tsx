@@ -2,11 +2,15 @@ import React, { useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { openModal } from '../slices/authModalSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../Store';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
   const controls = useAnimation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const user = useSelector((state: RootState) => state.user.user);
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -38,7 +42,16 @@ const HomePage: React.FC = () => {
           <p className="text-xl md:text-2xl mb-8">
             Experience the future of communication
           </p>
-          <button className="px-8 py-3 bg-white text-blue-600 rounded-full text-lg font-semibold hover:bg-blue-100 transition-colors">
+          <button
+            className="px-8 py-3 bg-white text-blue-600 rounded-full text-lg font-semibold hover:bg-blue-100 transition-colors"
+            onClick={() => {
+              if (user) {
+                navigate('/home');
+              } else {
+                dispatch(openModal('signup'));
+              }
+            }}
+          >
             Get Started
           </button>
         </motion.div>
@@ -114,9 +127,15 @@ const HomePage: React.FC = () => {
             </p>
             <button
               className="px-8 py-3 bg-accent-color text-white rounded-full text-lg font-semibold hover:bg-opacity-90 transition-colors"
-              onClick={() => dispatch(openModal('signup'))}
+              onClick={() => {
+                if (user) {
+                  navigate('/home');
+                } else {
+                  dispatch(openModal('signup'));
+                }
+              }}
             >
-              Sign Up Now
+              {user ? 'Open Servit' : 'Sign Up Now'}
             </button>
           </motion.div>
         </div>

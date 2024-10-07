@@ -49,7 +49,7 @@ const Login: React.FC = () => {
         })
       );
       dispatch(closeModal());
-      navigate('/profile');
+      navigate('/home');
     } catch (error) {
       showSnackbar('Invalid username password.', 'error');
     }

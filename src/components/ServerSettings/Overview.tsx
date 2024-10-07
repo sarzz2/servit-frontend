@@ -53,7 +53,7 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
   };
 
   return (
-    <div className="bg-primary dark:bg-dark-primary rounded-lg p-6">
+    <div className="bg-bg-primary dark:bg-dark-primary rounded-lg p-6">
       <div className="flex items-center mb-6">
         <div className="relative">
           <img
@@ -95,7 +95,7 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
             onChange={(e) =>
               setTempServer({ ...tempServer, name: e.target.value })
             }
-            className="w-full bg-secondary dark:bg-dark-secondary outline-none border-gray-300 dark:border-dark-border p-2 rounded-lg"
+            className="w-full bg-bg-secondary dark:bg-dark-secondary outline-none border-gray-300 dark:border-dark-border p-2 rounded-lg"
             placeholder="Enter server name"
           />
         </div>
@@ -110,7 +110,7 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
             onChange={(e) =>
               setTempServer({ ...tempServer, description: e.target.value })
             }
-            className="w-full bg-secondary dark:bg-dark-secondary outline-none border-gray-300 dark:border-dark-border p-2 rounded-lg"
+            className="w-full bg-bg-secondary dark:bg-dark-secondary outline-none border-gray-300 dark:border-dark-border p-2 rounded-lg"
             placeholder="Enter server description"
           />
         </div>

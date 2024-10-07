@@ -30,13 +30,13 @@ const Sidebar = ({
   };
 
   return (
-    <div className="w-64 bg-bg-tertiary dark:bg-bg-tertiary p-4">
+    <div className="w-80 bg-bg-tertiary dark:bg-bg-tertiary p-4">
       <div className="mb-4">
         <button
           className={`px-4 py-2 rounded-lg ${
             view === 'all'
               ? 'bg-bg-secondary dark:bg-dark-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover'
-              : 'bg-primary  hover:bg-button-hover dark:hover:bg-dark-button-hover'
+              : 'bg-bg-primary  hover:bg-button-hover dark:hover:bg-dark-button-hover'
           }`}
           onClick={() => {
             setView('all');
@@ -49,7 +49,7 @@ const Sidebar = ({
           className={`px-4 py-2 rounded-lg ${
             view === 'pending'
               ? 'bg-bg-secondary dark:bg-dark-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover'
-              : 'bg-primary  hover:bg-button-hover dark:hover:bg-dark-button-hover'
+              : 'bg-bg-primary  hover:bg-button-hover dark:hover:bg-dark-button-hover'
           }`}
           onClick={() => {
             setView('pending');

@@ -11,7 +11,7 @@ import DirectMessage from './DirectMessage/DirectMessage';
 const ServerList: React.FC = () => {
   const [servers, setServers] = useState<any[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
-  const [isDirectMessageOpen, setDirectMessageOpen] = useState(false);
+  const [isDirectMessageOpen, setDirectMessageOpen] = useState(true);
   const [serverName, setServerName] = useState('');
   const { showSnackbar } = useSnackbar();
 
@@ -21,6 +21,11 @@ const ServerList: React.FC = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    fetchServers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchServers = () => {
     // Fetch servers from the API
     axiosInstance
       .get('/servers/user_servers')
@@ -31,13 +36,14 @@ const ServerList: React.FC = () => {
         console.log(error);
         showSnackbar('Error loading servers', 'error');
       });
-  }, []);
+  };
 
   const handleCreateServer = () => {
     axiosInstance
       .post('/servers/', { name: serverName })
       .then((response) => {
-        setServers((prev) => [...prev, response.data.server]);
+        fetchServers();
+        // setServers((prev) => [...prev, response.data.server]);
         setModalOpen(false);
         setServerName('');
         showSnackbar('Server created successfully!', 'success');
@@ -67,7 +73,7 @@ const ServerList: React.FC = () => {
 
   return (
     <div className="flex">
-      <div className="w-16 h-screen flex flex-col items-center py-4 bg-secondary dark:bg-dark-secondary">
+      <div className="w-16 h-screen flex flex-col items-center py-4 bg-bg-secondary dark:bg-dark-secondary">
         <button
           className="w-12 h-12 mt-2 rounded-full flex items-center justify-center bg-bg-secondary dark:bg-dark-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover"
           onClick={() => {
@@ -77,6 +83,7 @@ const ServerList: React.FC = () => {
         >
           DM
         </button>
+        <hr className="w-3/4 mt-2 bg-bg-primary dark:bg-dark-primary" />
 
         {/* Server icons */}
         {servers.map((server) => (
@@ -149,7 +156,7 @@ const ServerList: React.FC = () => {
                   placeholder="Server Name"
                   value={serverName}
                   onChange={(e) => setServerName(e.target.value)}
-                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-secondary dark:bg-dark-secondary text-primary dark:text-dark-text-primary focus:outline-none focus:ring-2 focus:ring-accent-color"
+                  className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-bg-secondary dark:bg-dark-secondary text-primary dark:text-dark-text-primary focus:outline-none focus:ring-2 focus:ring-accent-color"
                 />
               </div>
 
@@ -185,12 +192,7 @@ const ServerList: React.FC = () => {
       {isDirectMessageOpen && <DirectMessage />}
 
       {/* ServerDetail renders if a server is selected */}
-      {selectedServer.id && (
-        <ServerDetail
-          serverId={selectedServer.id}
-          serverName={selectedServer.name}
-        />
-      )}
+      {selectedServer.id && <ServerDetail server={selectedServer} />}
     </div>
   );
 };

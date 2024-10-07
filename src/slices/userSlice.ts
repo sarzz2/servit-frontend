@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface UserState {
   isAuthenticated: boolean;
+  isAuthLoading: boolean;
   user: {
     id: string;
     email: string;
@@ -12,6 +13,7 @@ interface UserState {
 
 const initialState: UserState = {
   isAuthenticated: false,
+  isAuthLoading: true,
   user: null,
 };
 
@@ -29,12 +31,20 @@ const userSlice = createSlice({
       }>
     ) => {
       state.isAuthenticated = true;
+      state.isAuthLoading = false;
       state.user = action.payload;
     },
     logout: (state) => {
       state.isAuthenticated = false;
+      state.isAuthLoading = false;
       state.user = null;
       localStorage.removeItem('access_token');
+    },
+    startLoading(state) {
+      state.isAuthLoading = true;
+    },
+    finishLoading(state) {
+      state.isAuthLoading = false;
     },
   },
 });

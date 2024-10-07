@@ -34,9 +34,9 @@ const ServerSettings: React.FC = () => {
   };
 
   return (
-    <div className="flex w-full h-screen bg-secondary dark:bg-dark-secondary text-primary dark:text-dark-text-primary">
+    <div className="flex w-full h-screen bg-bg-secondary dark:bg-dark-secondary text-primary dark:text-dark-text-primary">
       {/* Sidebar */}
-      <aside className="w-1/4 min-w-[250px] bg-primary dark:bg-dark-primary py-6 px-4">
+      <aside className="w-1/4 min-w-[250px] bg-bg-primary dark:bg-dark-primary py-6 px-4">
         <ul>
           <li
             className={`py-2 px-4 hover:bg-hover-bg dark:hover:bg-dark-hover cursor-pointer rounded-lg mb-2 ${
@@ -62,7 +62,7 @@ const ServerSettings: React.FC = () => {
       </aside>
 
       {/* Main Content */}
-      <div className="w-3/4 bg-secondary dark:bg-dark-secondary p-6 overflow-auto">
+      <div className="w-3/4 bg-bg-secondary dark:bg-dark-secondary p-6 overflow-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold">Server Settings</h2>
           <button

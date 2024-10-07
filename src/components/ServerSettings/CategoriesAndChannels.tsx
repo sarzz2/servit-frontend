@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
-import Modal from './Modal';
+import ChannelModal from './ChannelModal';
+import CreateCategoryModal from './CreateCategoryModal';
+import { useSnackbar } from '../Snackbar';
 
 interface CategoriesAndChannelsProps {
   server: any;
@@ -16,26 +18,27 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
   );
   const [editedCategoryName, setEditedCategoryName] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [newCategoryNameModal, setNewCategoryNameModal] =
+    useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [confirmDeleteCategory, setConfirmDeleteCategory] = useState<any>(null);
+  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axiosInstance.get(`/category/${server.id}`);
-        setCategories(response.data);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [server.id]);
 
-  const handleCreateCategory = () => {
-    console.log('Create new category');
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(`/category/${server.id}`);
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEditCategory = (
@@ -69,19 +72,25 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
     setEditingCategoryId(null);
   };
 
-  const handleDeleteCategory = (categoryId: string) => {
-    setConfirmDeleteId(categoryId);
+  const handleDeleteCategory = (event: React.MouseEvent, category: any) => {
+    event.stopPropagation();
+    setConfirmDeleteCategory(category);
   };
 
   const confirmDelete = async () => {
-    if (confirmDeleteId) {
+    if (confirmDeleteCategory) {
       try {
-        await axiosInstance.delete(`/category/${confirmDeleteId}`);
-        setCategories(categories.filter((cat) => cat.id !== confirmDeleteId));
+        await axiosInstance.delete(
+          `/category/${server.id}/${confirmDeleteCategory.id}`
+        );
+        setConfirmDeleteCategory(null);
+        showSnackbar('Category deleted successfully!', 'success');
+        setCategories(
+          categories.filter((cat) => cat.id !== confirmDeleteCategory.id)
+        );
       } catch (error) {
+        showSnackbar('Error deleting category! Please try again', 'error');
         console.error('Error deleting category:', error);
-      } finally {
-        setConfirmDeleteId(null);
       }
     }
   };
@@ -96,20 +105,31 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
     setSelectedCategory(null);
   };
 
+  const handleCategoryCreated = () => {
+    fetchCategories();
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="bg-primary dark:bg-dark-primary rounded-lg p-6">
+    <div className="bg-bg-primary dark:bg-dark-primary rounded-lg p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">Categories and Channels</h2>
         <button
-          onClick={handleCreateCategory}
+          onClick={() => setNewCategoryNameModal(true)}
           className="text-white bg-button-primary hover:bg-button-hover rounded-lg px-4 py-2"
         >
           Create New Category
         </button>
+
+        <CreateCategoryModal
+          isOpen={newCategoryNameModal}
+          onClose={() => setNewCategoryNameModal(false)}
+          server={server}
+          onCategoryCreated={handleCategoryCreated}
+        />
       </div>
       <p>Manage categories and channels for your server here.</p>
       <div className="mt-4">
@@ -119,7 +139,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
           categories.map((category) => (
             <div
               key={category.id}
-              className={`flex justify-between items-center p-4 bg-secondary dark:bg-dark-secondary rounded-lg mb-2 ${
+              className={`flex justify-between items-center p-4 bg-bg-secondary dark:bg-dark-secondary rounded-lg mb-2 ${
                 editingCategoryId === category.id ? '' : 'cursor-pointer'
               }`}
               onClick={() => {
@@ -132,7 +152,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
                     type="text"
                     value={editedCategoryName}
                     onChange={(e) => setEditedCategoryName(e.target.value)}
-                    className="w-full bg-secondary dark:bg-dark-secondary border-none border-gray-300 dark:border-dark-border p-2 rounded-lg"
+                    className="w-full bg-bg-secondary dark:bg-dark-secondary border-none border-gray-300 dark:border-dark-border p-2 rounded-lg"
                     placeholder="Enter category name"
                     autoFocus
                   />
@@ -168,7 +188,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDeleteCategory(category.id)}
+                      onClick={(event) => handleDeleteCategory(event, category)}
                       className="text-red-500 hover:underline"
                     >
                       Delete
@@ -181,32 +201,32 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
         )}
       </div>
       {/* Modal for Channels */}
-      <Modal
+      <ChannelModal
         isOpen={isModalOpen}
         onClose={closeModal}
         title={`Channels in ${selectedCategory?.name}`}
-      >
-        {/* Here, you would render channels related to the selected category */}
-        <p>Channels will be displayed here.</p>
-        {/* Add logic to display channels, edit, and delete channels */}
-      </Modal>
+      ></ChannelModal>
 
       {/* Confirmation Dialog for Deletion */}
-      {confirmDeleteId && (
+      {confirmDeleteCategory && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white rounded-lg p-6">
+          <div className="bg-bg-primary dark:bg-dark-primary rounded-lg p-6 z-50">
             <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
-            <p>Are you sure you want to delete this category?</p>
+            <p>
+              Are you sure you want to delete{' '}
+              <b>{confirmDeleteCategory?.name} </b>
+              category?
+            </p>
             <div className="mt-4">
               <button
                 onClick={confirmDelete}
-                className="bg-red-500 text-white px-4 py-2 rounded"
+                className="bg-red-500 text-white hover:bg-red-700 px-4 py-2 rounded"
               >
                 Yes, Delete
               </button>
               <button
-                onClick={() => setConfirmDeleteId(null)}
-                className="ml-2 bg-gray-300 px-4 py-2 rounded"
+                onClick={() => setConfirmDeleteCategory(null)}
+                className="ml-2 bg-gray-400 hover:bg-gray-600 px-4 py-2 rounded"
               >
                 Cancel
               </button>

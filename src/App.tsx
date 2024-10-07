@@ -18,6 +18,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import UserHome from './pages/UserHome';
 import ServerSettings from './components/ServerSettings/ServerSettings';
 import { SnackbarProvider } from './components/Snackbar';
+import PermissionRoute from './components/PermissionRoute';
 
 const App: React.FC = () => {
   const { theme } = useTheme();
@@ -50,16 +51,18 @@ const App: React.FC = () => {
   }, [dispatch]);
 
   return (
-    <div className={`flex flex-col min-h-screen ${theme} `}>
-      <AuthPopup />
+    <div className={`flex flex-col min-h-screen ${theme}`}>
+      <SnackbarProvider>
+        <AuthPopup />
 
-      {/* Only render Header and Footer if not on the home route */}
-      {location.pathname === '/' && <Header />}
+        {/* Only render Header if not on the home route */}
+        {location.pathname === '/' && <Header />}
 
-      <main className="flex-grow">
-        <SnackbarProvider>
+        <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
+
+            {/* Routes that require authentication */}
             <Route
               path="/profile"
               element={
@@ -68,17 +71,40 @@ const App: React.FC = () => {
                 </ProtectedRoute>
               }
             />
-            <Route path="/home" element={<UserHome />} />
-            <Route path="/settings/:serverId" element={<ServerSettings />} />
-          </Routes>
-        </SnackbarProvider>
-      </main>
 
-      {location.pathname !== '/home' && <Footer />}
+            <Route
+              path="/home"
+              element={
+                <ProtectedRoute>
+                  <UserHome />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/settings/:serverId"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute
+                    requiredPermissions={[
+                      'MANAGE_SERVER',
+                      'MANAGE_CHANNELS',
+                      'OWNER',
+                    ]}
+                  >
+                    <ServerSettings />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </main>
+
+        {location.pathname === '/' && <Footer />}
+      </SnackbarProvider>
     </div>
   );
 };
-
 const AppWrapper: React.FC = () => {
   return (
     <Router>

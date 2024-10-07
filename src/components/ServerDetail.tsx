@@ -3,24 +3,49 @@ import axiosInstance from '../utils/axiosInstance';
 import { useSelector } from 'react-redux';
 import { RootState } from '../Store';
 import { useNavigate } from 'react-router-dom';
+import { useSnackbar } from './Snackbar';
+import CreateCategoryModal from './ServerSettings/CreateCategoryModal';
+import ConfirmationDialog from './ConfirmationDialog'; // Import your confirmation dialog
 
-const ServerDetail: React.FC<{
-  serverId: string;
-  serverName: string | null;
-}> = ({ serverId, serverName }) => {
+const ServerDetail: React.FC<{ server: any }> = ({ server }) => {
   const [categories, setCategories] = useState<any[]>([]);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLDivElement>(null);
   const { permissions } = useSelector((state: RootState) => state.permissions);
+  const { showSnackbar } = useSnackbar();
+  const [newCategoryNameModal, setNewCategoryNameModal] =
+    useState<boolean>(false);
+  const [isConfirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
+  const [isOwnerLeaving, setIsOwnerLeaving] = useState<boolean>(false);
   const navigate = useNavigate();
-  const openServerSettings = () => {
-    navigate(`/settings/${serverId}`);
-  };
 
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set()
   );
+
+  // Check permissions
+  const permissionSet = new Set(
+    permissions.map((permission) => permission.name)
+  );
+  const canManageChannels = permissionSet.has('MANAGE_CHANNELS');
+  const canManageServer = permissionSet.has('MANAGE_SERVER');
+  const owner = permissionSet.has('OWNER');
+
+  // Fetch categories on server change
+  useEffect(() => {
+    fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [server.id]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axiosInstance.get(`/category/${server.id}`);
+      setCategories(response.data);
+    } catch (error) {
+      console.log('Error fetching categories', error);
+    }
+  };
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories((prev) => {
@@ -34,32 +59,32 @@ const ServerDetail: React.FC<{
     });
   };
 
-  const requiredPermissions = ['SEND_MESSAGES', 'SPEAK'];
-  // Example: If need to check multiple permissions at once
-  //   const canPerformActions = requiredPermissions.every((permission) =>
-  //     permissionSet.has(permission)
-  //   );
-  const permissionSet = new Set(
-    permissions.map((permission) => permission.name)
-  );
-
-  // Check if the user has the required permissions
-  const canSendMessages = permissionSet.has('SEND_MESSAGES');
-  const canSpeak = permissionSet.has('SPEAK');
-  const owner = permissionSet.has('OWNER');
-
-  const toggleDropdown = () => {
-    setDropdownOpen((prev) => !prev);
+  const handleLeaveServer = () => {
+    // Open confirmation dialog
+    setIsOwnerLeaving(owner); // Set state to check if the user is the owner
+    setConfirmDialogOpen(true);
   };
 
-  const closeDropdown = () => {
-    setDropdownOpen(false);
+  const confirmLeaveServer = async () => {
+    try {
+      await axiosInstance.post(`/servers/leave/${server.id}`);
+      showSnackbar('Left server successfully', 'success');
+      // window.location.reload();
+      navigate('/home');
+    } catch (error) {
+      showSnackbar('Error leaving server', 'error');
+      console.error('Error leaving server:', error);
+    } finally {
+      setConfirmDialogOpen(false);
+    }
   };
 
-  // Close the dropdown when clicking outside
+  const toggleDropdown = () => setDropdownOpen((prev) => !prev);
+  const closeDropdown = () => setDropdownOpen(false);
+
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Check if the click is outside both the dropdown and the toggle button
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node) &&
@@ -76,30 +101,15 @@ const ServerDetail: React.FC<{
     };
   }, []);
 
-  useEffect(() => {
-    // Fetch categories and channels for the selected server
-    axiosInstance
-      .get(`/category/${serverId}`)
-      .then((response) => {
-        setCategories(response.data);
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.log('Error fetching categories', error);
-      });
-  }, [serverId]); // Fetch when serverId changes
-
   return (
     <div className="w-64 bg-bg-tertiary h-screen py-2">
       {/* Server Name with Toggle */}
       <div
-        className="mb-2 px-4 py-2 bg-secondary dark:bg-dark-secondary text-primary dark:text-dark-text-primary shadow-lg flex items-center justify-between cursor-pointer"
+        className="mb-2 px-4 py-2 bg-bg-secondary dark:bg-dark-secondary text-primary dark:text-dark-text-primary shadow-lg flex items-center justify-between cursor-pointer"
         ref={toggleButtonRef}
         onClick={toggleDropdown}
       >
-        <span className="font-semibold">{serverName}</span>
-
-        {/* Arrow Icon (direction changes based on dropdown state) */}
+        <span className="font-semibold">{server.name}</span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -122,45 +132,73 @@ const ServerDetail: React.FC<{
       {isDropdownOpen && (
         <div
           ref={dropdownRef}
-          className="absolute z-30 left-1/6 transform -translate-x-1/6 w-60 bg-secondary dark:bg-dark-secondary text-primary dark:text-dark-text-primary rounded-lg shadow-lg ml-2"
+          className="absolute z-30 left-1/6 transform -translate-x-1/6 w-60 bg-bg-secondary dark:bg-dark-secondary text-primary dark:text-dark-text-primary rounded-lg shadow-lg ml-2"
         >
           {owner && (
             <div
               className="px-4 py-2 hover:bg-hover-bg dark:hover:bg-dark-hover cursor-pointer"
-              onClick={openServerSettings}
+              onClick={() => navigate(`/settings/${server.id}`)}
             >
               Server Settings
             </div>
           )}
-          <div className="px-4 py-2 hover:bg-hover-bg dark:hover:bg-dark-hover cursor-pointer">
-            Create Category
-          </div>
-          <div className="px-4 py-2 text-red-500 hover:bg-hover-bg dark:hover:bg-dark-hover cursor-pointer">
+          {(canManageChannels || canManageServer || owner) && (
+            <div
+              className="px-4 py-2 hover:bg-hover-bg dark:hover:bg-dark-hover cursor-pointer"
+              onClick={() => setNewCategoryNameModal(true)}
+            >
+              Create Category
+            </div>
+          )}
+          <div
+            className="px-4 py-2 text-red-500 hover:bg-hover-bg dark:hover:bg-dark-hover cursor-pointer"
+            onClick={handleLeaveServer}
+          >
             Leave Server
           </div>
         </div>
       )}
+
+      <CreateCategoryModal
+        isOpen={newCategoryNameModal}
+        onClose={() => setNewCategoryNameModal(false)}
+        server={server}
+        onCategoryCreated={fetchCategories}
+      />
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={isConfirmDialogOpen}
+        message={
+          isOwnerLeaving
+            ? 'You are the owner of this server. This action cannot be reversed, and all associated data will be deleted.'
+            : 'Are you sure you want to leave this server?'
+        }
+        onConfirm={confirmLeaveServer}
+        onCancel={() => setConfirmDialogOpen(false)}
+      />
+
       {categories.map((category) => (
         <div key={category.id} className="mb-4">
           <div
             className="flex items-center justify-between px-4 cursor-pointer"
             onClick={() => toggleCategory(category.id)}
           >
-            {/* Left Side: Arrow and Category Name */}
             <div className="flex items-center">
               <span
-                className={`mr-2 text-secondary dark:text-dark-text-secondary0 transition-transform ${
+                className={`mr-2 text-secondary dark:text-dark-text-secondary transition-transform ${
                   expandedCategories.has(category.id) ? 'rotate-0' : 'rotate-90'
                 }`}
               >
+                {/* Toggle Arrow */}
                 {!expandedCategories.has(category.id) ? (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    viewBox="0 0 24 24"
                     fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
                     stroke="currentColor"
-                    strokeWidth={2}
+                    className="w-5 h-5"
                   >
                     <path
                       strokeLinecap="round"
@@ -171,11 +209,11 @@ const ServerDetail: React.FC<{
                 ) : (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    viewBox="0 0 24 24"
                     fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
                     stroke="currentColor"
-                    strokeWidth={2}
+                    className="w-5 h-5"
                   >
                     <path
                       strokeLinecap="round"
@@ -185,39 +223,15 @@ const ServerDetail: React.FC<{
                   </svg>
                 )}
               </span>
-              <h3 className="text-sm text-secondary dark:text-dark-text-secondary">
-                {category.name.toUpperCase()}
-              </h3>
+              <span className="font-semibold">{category.name}</span>
             </div>
-
-            {/* "+" Icon for creating a new channel */}
-            <button
-              className="text-green-500 hover:text-green-700"
-              onClick={(event) => event.stopPropagation()}
-            >
-              +
-            </button>
           </div>
 
-          {/* Show channels if the category is expanded */}
+          {/* Channels under the category */}
           {expandedCategories.has(category.id) && (
-            <ul>
-              {Array.isArray(category.channels) &&
-              category.channels.length > 0 ? (
-                category.channels.map((channel: any) => (
-                  <li
-                    key={channel.id}
-                    className="text-gray-200 px-4 py-2 hover:bg-gray-600 cursor-pointer"
-                  >
-                    # {channel.name}
-                  </li>
-                ))
-              ) : (
-                <li className="text-gray-500 px-4 py-2">
-                  No channels available
-                </li>
-              )}
-            </ul>
+            <div className="ml-4 mt-2">
+              {/* Render channels for the category here */}
+            </div>
           )}
         </div>
       ))}
