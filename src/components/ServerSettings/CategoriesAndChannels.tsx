@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
-import ChannelModal from './ChannelModal';
-import CreateCategoryModal from './CreateCategoryModal';
 import { useSnackbar } from '../Snackbar';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import CreateChannelModal from '../Common/CreateChannelModal';
+import CreateCategoryModal from './CreateCategoryModal';
 
 interface CategoriesAndChannelsProps {
   server: any;
@@ -17,11 +18,20 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
     null
   );
   const [editedCategoryName, setEditedCategoryName] = useState<string>('');
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const [newChannelName, setNewChannelName] = useState<string>('');
+  const [editingChannelId, setEditingChannelId] = useState<string | null>(null);
+  const [EditedChannelDescription, setEditedChannelDescription] =
+    useState<string>('');
+  const [editedChannelName, setEditedChannelName] = useState<string>('');
   const [newCategoryNameModal, setNewCategoryNameModal] =
     useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] = useState<any>(null);
-  const [confirmDeleteCategory, setConfirmDeleteCategory] = useState<any>(null);
+  const [newChannelDescription, setNewChannelDescription] =
+    useState<string>('');
+  const [newChannelCategoryId, setNewChannelCategoryId] = useState<
+    string | null
+  >(null);
+  const [channels, setChannels] = useState<{ [key: string]: any[] }>({});
   const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -34,28 +44,39 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
     try {
       const response = await axiosInstance.get(`/category/${server.id}`);
       setCategories(response.data);
+
+      // Fetch channels for each category
+      const categoryChannels: { [key: string]: any[] } = {};
+      for (const category of response.data) {
+        const channelResponse = await axiosInstance.get(
+          `/channels/${server.id}/${category.id}`
+        );
+        categoryChannels[category.id] = channelResponse.data;
+      }
+      setChannels(categoryChannels);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('Error fetching categories or channels:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEditCategory = (
-    event: React.MouseEvent,
-    categoryId: string,
-    name: string
-  ) => {
-    event.stopPropagation();
-    setEditingCategoryId(categoryId);
-    setEditedCategoryName(name);
+  const toggleCategory = (categoryId: string) => {
+    if (expandedCategories.includes(categoryId)) {
+      setExpandedCategories(
+        expandedCategories.filter((id) => id !== categoryId)
+      );
+    } else {
+      setExpandedCategories([...expandedCategories, categoryId]);
+    }
   };
 
-  const saveCategory = async (categoryId: string) => {
+  const saveCategory = async (event: React.MouseEvent, categoryId: string) => {
+    event.stopPropagation();
     try {
       await axiosInstance.patch(`/category/${server.id}/${categoryId}`, {
         name: editedCategoryName,
-      }); // Update the category
+      });
       setCategories(
         categories.map((cat) =>
           cat.id === categoryId ? { ...cat, name: editedCategoryName } : cat
@@ -68,45 +89,85 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
     }
   };
 
-  const cancelEdit = () => {
-    setEditingCategoryId(null);
+  const handleDeleteCategory = async (categoryId: string) => {
+    try {
+      await axiosInstance.delete(`/category/${server.id}/${categoryId}`);
+      showSnackbar('Category deleted successfully!', 'success');
+      setCategories(categories.filter((cat) => cat.id !== categoryId));
+    } catch (error) {
+      showSnackbar('Error deleting category!', 'error');
+    }
   };
 
-  const handleDeleteCategory = (event: React.MouseEvent, category: any) => {
-    event.stopPropagation();
-    setConfirmDeleteCategory(category);
-  };
-
-  const confirmDelete = async () => {
-    if (confirmDeleteCategory) {
+  const handleCreateChannel = async () => {
+    if (newChannelName && newChannelCategoryId) {
       try {
-        await axiosInstance.delete(
-          `/category/${server.id}/${confirmDeleteCategory.id}`
+        const response = await axiosInstance.post(
+          `/channels/${server.id}/${newChannelCategoryId}`,
+          {
+            name: newChannelName,
+            description: newChannelDescription,
+          }
         );
-        setConfirmDeleteCategory(null);
-        showSnackbar('Category deleted successfully!', 'success');
-        setCategories(
-          categories.filter((cat) => cat.id !== confirmDeleteCategory.id)
-        );
+        showSnackbar('Channel created successfully!', 'success');
+        setChannels((prevChannels) => ({
+          ...prevChannels,
+          [newChannelCategoryId]: [
+            ...(prevChannels[newChannelCategoryId] || []),
+            response.data.channel,
+          ],
+        }));
+        setNewChannelName('');
+        setNewChannelDescription('');
+        setNewChannelCategoryId(null);
       } catch (error) {
-        showSnackbar('Error deleting category! Please try again', 'error');
-        console.error('Error deleting category:', error);
+        console.error('Error creating channel:', error);
+        showSnackbar('Error creating channel, please try again.', 'error');
       }
     }
   };
 
-  const openModal = (category: any) => {
-    setSelectedCategory(category);
-    setIsModalOpen(true);
+  const editChannel = async (categoryId: string, channelId: string) => {
+    try {
+      // Update the channel name in the backend
+      await axiosInstance.patch(`/channels/${server.id}/${channelId}`, {
+        name: editedChannelName,
+        description: EditedChannelDescription,
+      });
+
+      // Update the channels state
+      setChannels((prevChannels) => ({
+        ...prevChannels,
+        [categoryId]: prevChannels[categoryId].map((chan) =>
+          chan.id === channelId
+            ? {
+                ...chan,
+                name: editedChannelName,
+                description: EditedChannelDescription,
+              }
+            : chan
+        ),
+      }));
+    } catch (error) {
+      console.error('Error updating channel:', error);
+    } finally {
+      setEditingChannelId(null);
+    }
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedCategory(null);
-  };
-
-  const handleCategoryCreated = () => {
-    fetchCategories();
+  const handleDeleteChannel = async (categoryId: string, channelId: string) => {
+    try {
+      await axiosInstance.delete(`/channels/${server.id}/${channelId}`);
+      // Update the channels state
+      setChannels((prevChannels) => ({
+        ...prevChannels,
+        [categoryId]: prevChannels[categoryId]
+          ? prevChannels[categoryId].filter((chan) => chan.id !== channelId)
+          : [], // Fallback to empty array if category doesn't exist
+      }));
+    } catch (error) {
+      console.error('Error deleting channel:', error);
+    }
   };
 
   if (loading) {
@@ -123,117 +184,214 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
         >
           Create New Category
         </button>
-
         <CreateCategoryModal
           isOpen={newCategoryNameModal}
           onClose={() => setNewCategoryNameModal(false)}
           server={server}
-          onCategoryCreated={handleCategoryCreated}
+          onCategoryCreated={fetchCategories}
         />
       </div>
-      <p>Manage categories and channels for your server here.</p>
+
       <div className="mt-4">
         {categories.length === 0 ? (
           <p>No categories found.</p>
         ) : (
           categories.map((category) => (
-            <div
-              key={category.id}
-              className={`flex justify-between items-center p-4 bg-bg-secondary dark:bg-dark-secondary rounded-lg mb-2 ${
-                editingCategoryId === category.id ? '' : 'cursor-pointer'
-              }`}
-              onClick={() => {
-                if (!editingCategoryId) openModal(category);
-              }}
-            >
-              {editingCategoryId === category.id ? (
-                <div className="flex flex-grow items-center">
-                  <input
-                    type="text"
-                    value={editedCategoryName}
-                    onChange={(e) => setEditedCategoryName(e.target.value)}
-                    className="w-full bg-bg-secondary dark:bg-dark-secondary border-none border-gray-300 dark:border-dark-border p-2 rounded-lg"
-                    placeholder="Enter category name"
-                    autoFocus
-                  />
-                </div>
-              ) : (
-                <span className="font-medium">{category.name}</span>
-              )}
-
-              <div className="flex items-center">
+            <div key={category.id} className="mb-4">
+              <div
+                className="flex justify-between items-center p-4 bg-bg-secondary dark:bg-dark-secondary rounded-lg"
+                onClick={() => toggleCategory(category.id)}
+              >
                 {editingCategoryId === category.id ? (
-                  <>
+                  <div className="flex flex-grow items-center cursor-pointer">
+                    <input
+                      type="text"
+                      value={editedCategoryName}
+                      onChange={(e) => setEditedCategoryName(e.target.value)}
+                      className="w-full bg-bg-secondary dark:bg-dark-secondary border-none p-2 rounded-lg"
+                      placeholder="Enter category name"
+                      autoFocus
+                    />
                     <button
-                      onClick={() => saveCategory(category.id)}
-                      className="text-green-500 hover:text-green-700 mx-1"
+                      onClick={(e) => saveCategory(e, category.id)}
+                      className="text-green-500 mx-2"
                     >
-                      <span className="material-icons">Update</span>
+                      <i className="fas fa-lg fa-check" />
                     </button>
                     <button
-                      onClick={cancelEdit}
-                      className="text-red-500 hover:text-red-700 mx-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingCategoryId(null);
+                      }}
+                      className="text-red-500 mx-2"
                     >
-                      <span className="material-icons">Close</span>
+                      <i className="fas fa-lg fa-times" />
                     </button>
-                  </>
+                  </div>
                 ) : (
                   <>
-                    <button
-                      onClick={(event) =>
-                        handleEditCategory(event, category.id, category.name)
-                      }
-                      className="text-blue-500 hover:underline mx-2"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={(event) => handleDeleteCategory(event, category)}
-                      className="text-red-500 hover:underline"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex items-center justify-between cursor-pointer">
+                      <span className="font-medium"> </span>
+
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className={`w-5 h-5 transition-transform ${expandedCategories.includes(category.id) ? 'rotate-180' : 'rotate-90'}`}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 15l6-6 6 6"
+                        />
+                      </svg>
+                      {category.name}
+                    </div>
+                    <div className="flex items-center">
+                      <button
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setEditingCategoryId(category.id);
+                          setEditedCategoryName(category.name);
+                        }}
+                        className="text-blue-500 mx-2"
+                      >
+                        <i className="fas fa-edit" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCategory(category.id)}
+                        className="text-red-500 mx-2"
+                      >
+                        <i className="fas fa-trash" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setNewChannelCategoryId(category.id); // Set category for new channel
+                        }}
+                        className="text-green-500 mx-2"
+                      >
+                        <i className="fas fa-plus" />
+                      </button>
+                      <button className="mx-2">
+                        <i className="fas fa-gear" />
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
+
+              {expandedCategories.includes(category.id) && (
+                <div className="ml-6 mt-2">
+                  {channels[category.id]?.length === 0 ? (
+                    <p>No channels found.</p>
+                  ) : (
+                    channels[category.id]?.map((channel: any) => (
+                      <div
+                        key={channel.id}
+                        className="flex justify-between items-center p-2 mb-2 bg-bg-tertiary dark:bg-dark-tertiary rounded-md"
+                      >
+                        {editingChannelId === channel.id ? (
+                          <>
+                            <label className="block text-sm font-medium">
+                              Channel Name
+                              <input
+                                value={editedChannelName}
+                                onChange={(e) =>
+                                  setEditedChannelName(e.target.value)
+                                }
+                                className="w-full bg-bg-secondary border-none p-2 rounded-lg mt-1 outline-none"
+                                placeholder="Enter channel name"
+                                autoFocus
+                              />
+                            </label>
+                            <label className="block text-sm font-medium">
+                              Channel Description
+                              <input
+                                value={EditedChannelDescription}
+                                onChange={(e) =>
+                                  setEditedChannelDescription(e.target.value)
+                                }
+                                className="w-full bg-bg-secondary border-none p-2 rounded-lg mt-1 outline-none"
+                                placeholder="Enter channel description"
+                              />
+                            </label>
+                            <div>
+                              <button
+                                onClick={() =>
+                                  editChannel(category.id, channel.id)
+                                }
+                                className="text-green-500 mx-2"
+                              >
+                                <i className="fas fa-lg fa-check" />
+                              </button>
+                              <button
+                                onClick={() => setEditingChannelId(null)}
+                                className="text-red-500 mx-2"
+                              >
+                                <i className="fas fa-lg fa-times" />
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex items-center">
+                              <div className="leading-tight">
+                                <span>{channel.name}</span>
+                                <br />
+                                <span className="text-sm text-secondary dark:text-dark-text-secondary">
+                                  {channel.description}
+                                </span>
+                              </div>
+                            </div>
+                            <div>
+                              <button
+                                onClick={() => {
+                                  setEditingChannelId(channel.id);
+                                  setEditedChannelName(channel.name);
+                                  setEditedChannelDescription(
+                                    channel.description
+                                  );
+                                }}
+                                className="text-blue-500 mx-2"
+                              >
+                                <i className="fas fa-edit" />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleDeleteChannel(category.id, channel.id)
+                                }
+                                className="text-red-500 mx-2"
+                              >
+                                <i className="fas fa-trash" />
+                              </button>
+                              <button className="mx-2">
+                                <i className="fas fa-gear" />
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           ))
         )}
       </div>
-      {/* Modal for Channels */}
-      <ChannelModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        title={`Channels in ${selectedCategory?.name}`}
-      ></ChannelModal>
-
-      {/* Confirmation Dialog for Deletion */}
-      {confirmDeleteCategory && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-bg-primary dark:bg-dark-primary rounded-lg p-6 z-50">
-            <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
-            <p>
-              Are you sure you want to delete{' '}
-              <b>{confirmDeleteCategory?.name} </b>
-              category?
-            </p>
-            <div className="mt-4">
-              <button
-                onClick={confirmDelete}
-                className="bg-red-500 text-white hover:bg-red-700 px-4 py-2 rounded"
-              >
-                Yes, Delete
-              </button>
-              <button
-                onClick={() => setConfirmDeleteCategory(null)}
-                className="ml-2 bg-gray-400 hover:bg-gray-600 px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal for creating new channel */}
+      <CreateChannelModal
+        newChannelCategoryId={newChannelCategoryId}
+        newChannelName={newChannelName}
+        setNewChannelName={setNewChannelName}
+        newChannelDescription={newChannelDescription}
+        setNewChannelDescription={setNewChannelDescription}
+        handleCreateChannel={handleCreateChannel}
+        setNewChannelCategoryId={setNewChannelCategoryId}
+      />
     </div>
   );
 };

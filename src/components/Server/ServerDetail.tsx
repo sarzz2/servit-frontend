@@ -10,6 +10,7 @@ import ConfirmationDialog from '../Common/ConfirmationDialog';
 
 const ServerDetail: React.FC = () => {
   const [categories, setCategories] = useState<any[]>([]);
+  const [channels, setChannels] = useState<{ [key: string]: any[] }>({});
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [newCategoryNameModal, setNewCategoryNameModal] =
     useState<boolean>(false);
@@ -62,7 +63,24 @@ const ServerDetail: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const response = await axiosInstance.get(`/category/${serverId}`);
-      setCategories(response.data);
+      const fetchedCategories = response.data;
+      setCategories(fetchedCategories);
+
+      // Initialize an array to accumulate channels for all categories
+      const allChannels: { [key: string]: any[] } = {};
+
+      // Loop through the categories to fetch their channels
+      for (let i = 0; i < fetchedCategories.length; i++) {
+        const channelsResponse = await axiosInstance.get(
+          `/channels/${serverId}/${fetchedCategories[i].id}`
+        );
+
+        // Store channels for the current category in the allChannels object
+        allChannels[fetchedCategories[i].id] = channelsResponse.data;
+      }
+
+      // Set the accumulated channels in the state
+      setChannels(allChannels);
     } catch (error) {
       console.error('Error fetching categories', error);
     }
@@ -174,7 +192,7 @@ const ServerDetail: React.FC = () => {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className={`w-5 h-5 transition-transform ${expandedCategories.has(category.id) ? 'rotate-0' : 'rotate-90'}`}
+              className={`w-5 h-5 transition-transform ${expandedCategories.has(category.id) ? 'rotate-180' : 'rotate-90'}`}
             >
               <path
                 strokeLinecap="round"
@@ -183,9 +201,12 @@ const ServerDetail: React.FC = () => {
               />
             </svg>
           </div>
-          {expandedCategories.has(category.id) && (
-            <div className="ml-4 mt-2">{/* Channels go here */}</div>
-          )}
+          {expandedCategories.has(category.id) &&
+            channels[category.id]?.map((channel) => (
+              <div key={channel.id} className="ml-4 mt-2">
+                {channel.name}
+              </div>
+            ))}
         </div>
       ))}
     </div>

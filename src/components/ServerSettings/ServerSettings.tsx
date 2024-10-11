@@ -67,7 +67,7 @@ const ServerSettings: React.FC = () => {
           <h2 className="text-2xl font-semibold">Server Settings</h2>
           <button
             className="bg-hover-bg p-2 rounded-full"
-            onClick={() => navigate('/home')}
+            onClick={() => navigate('/home/' + serverId)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
