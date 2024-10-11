@@ -14,10 +14,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const isAuthLoading = useSelector(
     (state: RootState) => state.user.isAuthLoading
   ); // Assuming you have a loading state for authentication
-
   if (isAuthLoading) {
     // You can replace this with a spinner or another UI component for loading
-    return <div>Loading...</div>;
+    return <div>Loading</div>;
   }
 
   return isAuthenticated ? children : <Navigate to="/login" />;

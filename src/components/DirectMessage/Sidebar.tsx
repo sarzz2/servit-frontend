@@ -35,7 +35,7 @@ const Sidebar = ({
         <button
           className={`px-4 py-2 rounded-lg ${
             view === 'all'
-              ? 'bg-bg-secondary dark:bg-dark-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover'
+              ? 'bg-bg-button-primary dark:bg-dark-button-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover'
               : 'bg-bg-primary  hover:bg-button-hover dark:hover:bg-dark-button-hover'
           }`}
           onClick={() => {
@@ -46,9 +46,9 @@ const Sidebar = ({
           All
         </button>
         <button
-          className={`px-4 py-2 rounded-lg ${
+          className={`px-4 py-2 ml-2 rounded-lg ${
             view === 'pending'
-              ? 'bg-bg-secondary dark:bg-dark-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover'
+              ? 'bg-bg-button-primary dark:bg-dark-button-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover'
               : 'bg-bg-primary  hover:bg-button-hover dark:hover:bg-dark-button-hover'
           }`}
           onClick={() => {

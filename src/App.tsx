@@ -11,7 +11,7 @@ import Home from './pages/Home';
 import AuthPopup from './components/Auth/AuthPopup';
 import { useTheme } from './contexts/ThemeContext';
 import { useDispatch } from 'react-redux';
-import { setUser } from './slices/userSlice';
+import { setUser, finishLoading } from './slices/userSlice';
 import axiosInstance from './utils/axiosInstance';
 import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -49,6 +49,8 @@ const App: React.FC = () => {
         .catch((error) => {
           console.error('Error fetching user data:', error);
         });
+    } else {
+      dispatch(finishLoading()); // Ensures the app knows loading is done
     }
   }, [dispatch]);
 
