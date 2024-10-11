@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../Store';
 import { closeModal } from '../../slices/authModalSlice';
-import { XMarkIcon } from '@heroicons/react/20/solid';
 import Login from './Login';
 import Register from './Register';
 
@@ -31,15 +30,14 @@ const AuthPopup: React.FC = () => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div
-        className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md w-[900px] flex"
+        className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md w-[900px] flex flex-col"
         style={{ backgroundColor: 'var(--bg-primary)' }}
       >
-        <button
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-          onClick={() => dispatch(closeModal())}
-        >
-          <XMarkIcon className="h-6 w-6" />
-        </button>
+        <div className="flex justify-end">
+          <button className="" onClick={() => dispatch(closeModal())}>
+            <i className="fas fa-times" />
+          </button>
+        </div>
         {isLogin ? <Login /> : <Register />}
       </div>
     </div>

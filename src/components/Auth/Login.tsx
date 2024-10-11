@@ -2,7 +2,7 @@ import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { closeModal } from '../../slices/authModalSlice';
+import { closeModal, openModal } from '../../slices/authModalSlice';
 import axiosInstance from '../../utils/axiosInstance';
 import { useSnackbar } from '../Snackbar';
 import { useNavigate } from 'react-router-dom';
@@ -56,59 +56,77 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="w-1/2 p-4">
-      <h2
-        className="text-xl font-bold mb-4"
-        style={{ color: 'var(--text-primary)' }}
-      >
-        Login
-      </h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label
-            className="block text-sm font-medium"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Username
-          </label>
-          <input
-            type="text"
-            className={`w-full p-2 border rounded ${
-              errors.username ? 'border-red-500' : 'border-gray-300'
-            }`}
-            style={{ color: '#1f2937' }}
-            {...register('username')}
-          />
-          {errors.username && (
-            <p className="text-red-500 text-sm">{errors.username.message}</p>
-          )}
-        </div>
-        <div>
-          <label
-            className="block text-sm font-medium"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Password
-          </label>
-          <input
-            type="password"
-            className={`w-full p-2 border rounded ${
-              errors.password ? 'border-red-500' : 'border-gray-300'
-            }`}
-            style={{ color: '#1f2937' }}
-            {...register('password')}
-          />
-          {errors.password && (
-            <p className="text-red-500 text-sm">{errors.password.message}</p>
-          )}
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+    <div className="flex">
+      <div className="w-1/2 p-2">
+        <h2
+          className="text-xl font-bold mb-4"
+          style={{ color: 'var(--text-primary)' }}
         >
           Login
-        </button>
-      </form>
+        </h2>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <label
+              className="block text-sm font-medium"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Username
+            </label>
+            <input
+              type="text"
+              className={`w-full p-2 border rounded ${
+                errors.username ? 'border-red-500' : 'border-gray-300'
+              }`}
+              style={{ color: '#1f2937' }}
+              {...register('username')}
+            />
+            {errors.username && (
+              <p className="text-red-500 text-sm">{errors.username.message}</p>
+            )}
+          </div>
+          <div>
+            <label
+              className="block text-sm font-medium"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              className={`w-full p-2 border rounded ${
+                errors.password ? 'border-red-500' : 'border-gray-300'
+              }`}
+              style={{ color: '#1f2937' }}
+              {...register('password')}
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm">{errors.password.message}</p>
+            )}
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+          >
+            Login
+          </button>
+        </form>
+        <p className="mt-2 ">
+          Don't have an account?{' '}
+          <button
+            className="text-blue-500 hover:underline"
+            onClick={() => dispatch(openModal('signup'))}
+          >
+            Sign up now
+          </button>
+        </p>
+      </div>
+      <div className="w-1/2 p-2">
+        <img
+          src="/logo.jpeg"
+          alt="Register"
+          className="w-full h-full object-cover"
+        />
+      </div>
     </div>
   );
 };
