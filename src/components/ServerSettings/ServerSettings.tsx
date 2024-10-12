@@ -18,7 +18,7 @@ const ServerSettings: React.FC = () => {
         setServer(response.data.server);
       })
       .catch((error) => {
-        console.log('Error fetching server data', error);
+        console.error('Error fetching server data', error);
       });
   }, [serverId]);
 

@@ -26,7 +26,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 const App: React.FC = () => {
   const { theme } = useTheme();
   const dispatch = useDispatch();
-  const location = useLocation(); // Hook to get the current location
+  const location = useLocation();
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -51,8 +51,9 @@ const App: React.FC = () => {
           console.error('Error fetching user data:', error);
         });
     } else {
-      dispatch(finishLoading()); // Ensures the app knows loading is done
+      dispatch(finishLoading());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   return (

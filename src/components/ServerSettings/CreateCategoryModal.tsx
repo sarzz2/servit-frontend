@@ -20,9 +20,6 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   const { showSnackbar } = useSnackbar();
 
   const handleSubmit = () => {
-    if (categoryName.length < 3) {
-      showSnackbar('Category name must be at least 3 characters long', 'error');
-    }
     axiosInstance
       .post(`/category/${server.id}`, { name: categoryName })
       .then((response) => {
@@ -33,6 +30,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
       })
       .catch((error) => {
         console.error('Error creating category:', error);
+        showSnackbar(error.response.data.detail[0].msg, 'error');
       });
   };
 

@@ -15,7 +15,6 @@ const SecuritySettings: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Password update:', passwordData);
     // Handle password change logic here
   };
 

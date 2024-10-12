@@ -84,7 +84,8 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
           cat.id === categoryId ? { ...cat, name: editedCategoryName } : cat
         )
       );
-    } catch (error) {
+    } catch (error: any) {
+      showSnackbar(error.response.data.detail[0].msg, 'error');
       console.error('Error updating category:', error);
     } finally {
       setEditingCategoryId(null);
@@ -122,9 +123,9 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
         setNewChannelName('');
         setNewChannelDescription('');
         setNewChannelCategoryId(null);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error creating channel:', error);
-        showSnackbar('Error creating channel, please try again.', 'error');
+        showSnackbar(error.response.data.detail[0].msg, 'error');
       }
     }
   };
@@ -150,8 +151,9 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
             : chan
         ),
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating channel:', error);
+      showSnackbar(error.response.data.detail[0].msg, 'error');
     } finally {
       setEditingChannelId(null);
     }

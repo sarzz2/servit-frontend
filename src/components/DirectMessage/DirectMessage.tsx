@@ -28,7 +28,7 @@ const DirectMessageComponent = () => {
         }));
         setFriends(friendsData);
       })
-      .catch((error) => console.log('Error fetching friends', error));
+      .catch((error) => console.error('Error fetching friends', error));
   };
 
   useEffect(() => {

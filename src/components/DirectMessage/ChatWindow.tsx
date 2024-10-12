@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { format } from 'date-fns';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../Store';
+import { useSnackbar } from '../Snackbar';
 
 const ChatWindow = ({
   activeChat,
@@ -37,6 +38,7 @@ const ChatWindow = ({
   const retryInterval = useRef<number | null>(null);
   const typingTimeoutRef = useRef<number | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const { showSnackbar } = useSnackbar();
 
   const connectWebSocket = () => {
     const wsUrl = `ws://localhost:8080?from_user_id=${userId}&to_user_id=${toUserId}&token=${localStorage.getItem('access_token')}`;
@@ -94,6 +96,10 @@ const ChatWindow = ({
     };
 
     socketRef.current.onerror = (error) => {
+      showSnackbar(
+        'An error occurred while connecting to the server! Retrying...',
+        'error'
+      );
       console.error('WebSocket error:', error);
       socketRef.current?.close();
     };
@@ -164,7 +170,6 @@ const ChatWindow = ({
           `http://localhost:8080/fetch_paginated_messages?to_user_id=${toUserId}&page=${page}&token=${localStorage.getItem('access_token')}`
         );
         const olderMessages = await response.json();
-        console.log('Older messages:', olderMessages);
 
         if (olderMessages?.length > 0) {
           setMessages((prevMessages) => [...olderMessages, ...prevMessages]);
@@ -173,6 +178,7 @@ const ChatWindow = ({
           setHasMore(false); // No more messages to load
         }
       } catch (error) {
+        showSnackbar('Error loading messages', 'error');
         console.error('Error loading more messages:', error);
       } finally {
         setLoadingMore(false);

@@ -42,7 +42,7 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
         setHasChanges(false);
       })
       .catch((error) => {
-        showSnackbar('Server could not be updated! Please try again', 'error');
+        showSnackbar(error.response.data.detail[0].msg, 'error');
 
         console.error('Error updating server:', error);
       });

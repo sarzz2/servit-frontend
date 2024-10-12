@@ -50,8 +50,12 @@ const Login: React.FC = () => {
       );
       dispatch(closeModal());
       navigate('/home');
-    } catch (error) {
-      showSnackbar('Invalid username password.', 'error');
+    } catch (error: any) {
+      if (error.response.status === 401) {
+        showSnackbar('Invalid username or password.', 'error');
+      } else {
+        showSnackbar('An error occurred. Please try again.', 'error');
+      }
     }
   };
 

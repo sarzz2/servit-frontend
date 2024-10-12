@@ -12,6 +12,7 @@ interface RegisterFormValues {
   username: string;
   email: string;
   password: string;
+  confirmPassword: string;
 }
 
 const signupSchema = yup.object().shape({
@@ -21,6 +22,10 @@ const signupSchema = yup.object().shape({
     .string()
     .min(6, 'Password must be at least 6 characters')
     .required('Password is required'),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password'), undefined], 'Passwords must match')
+    .required('Confirm Password is required'),
 });
 
 const Register: React.FC = () => {
@@ -35,8 +40,9 @@ const Register: React.FC = () => {
   } = useForm<RegisterFormValues>({ resolver: yupResolver(signupSchema) });
 
   const onSubmit = async (data: RegisterFormValues) => {
+    const { confirmPassword, ...submitData } = data; // Exclude confirmPassword
     try {
-      const response = await axiosInstance.post('/users/register', data);
+      const response = await axiosInstance.post('/users/register', submitData);
       const token = response.data.access_token;
 
       localStorage.setItem('access_token', token);
@@ -51,8 +57,8 @@ const Register: React.FC = () => {
       showSnackbar('Registration successful!', 'success');
       dispatch(closeModal());
       navigate('/profile');
-    } catch (error) {
-      showSnackbar('Registration failed. Please try again.', 'error');
+    } catch (error: any) {
+      showSnackbar(error.response.data.detail, 'error');
     }
   };
 
@@ -121,6 +127,27 @@ const Register: React.FC = () => {
             />
             {errors.password && (
               <p className="text-red-500 text-sm">{errors.password.message}</p>
+            )}
+          </div>
+          <div>
+            <label
+              className="block text-sm font-medium"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              className={`w-full p-2 border rounded ${
+                errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+              }`}
+              style={{ color: '#1f2937' }}
+              {...register('confirmPassword')}
+            />
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-sm">
+                {errors.confirmPassword.message}
+              </p>
             )}
           </div>
           <button

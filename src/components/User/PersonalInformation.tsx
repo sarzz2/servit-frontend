@@ -28,7 +28,6 @@ const PersonalInformation: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Updated Information:', formData);
     // Add logic to update user information here if needed
   };
 

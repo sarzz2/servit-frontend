@@ -33,6 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         showSnackbar('Friend request rejected!', 'error');
       }
     } catch (error) {
+      showSnackbar('An error occurred. Please try again.', 'error');
       console.error('Error updating friend status:', error);
     }
   };
