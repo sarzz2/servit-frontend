@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import CreateServerModal from '../Common/CreateServerModal';
 
 const ServerList: React.FC = () => {
-  const [servers, setServers] = useState<any[]>([]);
+  const [servers, setServers] = useState<{ id: string; name: string }[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();

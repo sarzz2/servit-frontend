@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { useSnackbar } from '../Snackbar';
-import '@fortawesome/fontawesome-free/css/all.min.css';
 import CreateChannelModal from '../Common/CreateChannelModal';
 import CreateCategoryModal from './CreateCategoryModal';
+import { Channel } from '../../types/channel';
+import { Category } from '../../types/category';
+import { Server } from '../../types/server';
 
 interface CategoriesAndChannelsProps {
-  server: any;
+  server: Server;
 }
 
 const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
   server,
 }) => {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
     null
@@ -21,7 +23,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [newChannelName, setNewChannelName] = useState<string>('');
   const [editingChannelId, setEditingChannelId] = useState<string | null>(null);
-  const [EditedChannelDescription, setEditedChannelDescription] =
+  const [editedChannelDescription, setEditedChannelDescription] =
     useState<string>('');
   const [editedChannelName, setEditedChannelName] = useState<string>('');
   const [newCategoryNameModal, setNewCategoryNameModal] =
@@ -31,7 +33,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
   const [newChannelCategoryId, setNewChannelCategoryId] = useState<
     string | null
   >(null);
-  const [channels, setChannels] = useState<{ [key: string]: any[] }>({});
+  const [channels, setChannels] = useState<{ [key: string]: Channel[] }>({});
   const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -46,7 +48,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
       setCategories(response.data);
 
       // Fetch channels for each category
-      const categoryChannels: { [key: string]: any[] } = {};
+      const categoryChannels: { [key: string]: Channel[] } = {};
       for (const category of response.data) {
         const channelResponse = await axiosInstance.get(
           `/channels/${server.id}/${category.id}`
@@ -132,7 +134,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
       // Update the channel name in the backend
       await axiosInstance.patch(`/channels/${server.id}/${channelId}`, {
         name: editedChannelName,
-        description: EditedChannelDescription,
+        description: editedChannelDescription,
       });
 
       // Update the channels state
@@ -143,7 +145,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
             ? {
                 ...chan,
                 name: editedChannelName,
-                description: EditedChannelDescription,
+                description: editedChannelDescription,
               }
             : chan
         ),
@@ -187,7 +189,11 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
         <CreateCategoryModal
           isOpen={newCategoryNameModal}
           onClose={() => setNewCategoryNameModal(false)}
-          server={server}
+          server={{
+            id: server.id,
+            name: server.name,
+            image: server.image,
+          }}
           onCategoryCreated={fetchCategories}
         />
       </div>
@@ -288,7 +294,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
                   {channels[category.id]?.length === 0 ? (
                     <p>No channels found.</p>
                   ) : (
-                    channels[category.id]?.map((channel: any) => (
+                    channels[category.id]?.map((channel: Channel) => (
                       <div
                         key={channel.id}
                         className="flex justify-between items-center p-2 mb-2 bg-bg-tertiary dark:bg-dark-tertiary rounded-md"
@@ -310,7 +316,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
                             <label className="block text-sm font-medium">
                               Channel Description
                               <input
-                                value={EditedChannelDescription}
+                                value={editedChannelDescription}
                                 onChange={(e) =>
                                   setEditedChannelDescription(e.target.value)
                                 }

@@ -1,14 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-interface Permission {
-  id: string;
-  name: string;
-}
-
-interface Role {
-  id: string;
-  name: string;
-}
+import { Permission } from '../types/permission';
+import { Role } from '../types/role';
 
 interface PermissionsState {
   serverId: string | null;

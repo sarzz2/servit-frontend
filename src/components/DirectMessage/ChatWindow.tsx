@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from 'react';
-import '@fortawesome/fontawesome-free/css/all.min.css';
 import { format } from 'date-fns';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../Store';
@@ -9,13 +8,24 @@ const ChatWindow = ({
   toUserId,
   userId,
 }: {
-  activeChat: any;
-  toUserId: any;
-  userId: any;
+  activeChat: {
+    profile_picture_url: string;
+    username: string;
+  } | null;
+  toUserId: string;
+  userId: string | undefined;
 }) => {
   const user = useSelector((state: RootState) => state.user.user);
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<
+    {
+      id: string;
+      from_user_id: string;
+      to_user_id: string;
+      content: string;
+      created_at: string;
+    }[]
+  >([]);
   const [page, setPage] = useState(2);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -26,7 +36,6 @@ const ChatWindow = ({
   const messageEndRef = useRef<HTMLDivElement | null>(null);
   const retryInterval = useRef<number | null>(null);
   const typingTimeoutRef = useRef<number | null>(null);
-  const [myTyping, setMyTyping] = useState(false); // for your own typing status
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   const connectWebSocket = () => {
@@ -103,7 +112,7 @@ const ChatWindow = ({
   const sendTypingIndicator = (isTyping: boolean) => {
     if (socketRef.current) {
       const typingPayload = {
-        from_user_id: userId,
+        from_user_id: userId || '',
         to_user_id: toUserId,
         type: isTyping ? 'typing' : 'not_typing',
       };
@@ -137,14 +146,12 @@ const ChatWindow = ({
   }, [messages, page]);
 
   const handleTyping = () => {
-    setMyTyping(true);
     sendTypingIndicator(true);
 
     if (typingTimeoutRef.current) {
       window.clearTimeout(typingTimeoutRef.current);
     }
     typingTimeoutRef.current = window.setTimeout(() => {
-      setMyTyping(false);
       sendTypingIndicator(false);
     }, 2000);
   };
@@ -190,12 +197,19 @@ const ChatWindow = ({
   const sendMessage = () => {
     if (socketRef.current && message.trim()) {
       const msg = {
-        from_user_id: userId,
+        from_user_id: userId || '',
         to_user_id: toUserId,
         content: message,
       };
       socketRef.current.send(JSON.stringify(msg));
-      setMessages((prevMessages) => [...prevMessages, msg]);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          ...msg,
+          id: `${Date.now()}`,
+          created_at: new Date().toISOString(),
+        },
+      ]);
       setMessage('');
       setIsTyping(false);
       sendTypingIndicator(false);

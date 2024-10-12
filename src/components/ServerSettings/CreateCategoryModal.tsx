@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { useSnackbar } from '../Snackbar';
+import { Server } from '../../types/server';
 
 interface CreateCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  server: any;
+  server: Server;
   onCategoryCreated: () => void;
 }
 

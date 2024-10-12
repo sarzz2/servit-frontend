@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import SaveCancelButtons from '../SaveCancelButtons';
 import axiosInstance from '../../utils/axiosInstance';
 import { useSnackbar } from '../Snackbar';
+import { Server } from '../../types/server';
 
 interface OverviewProps {
-  server: any;
-  setServer: (server: any) => void;
+  server: Server;
+  setServer: (server: Server) => void;
 }
 
 const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {

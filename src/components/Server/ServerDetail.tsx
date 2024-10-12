@@ -7,11 +7,19 @@ import { useSnackbar } from '../Snackbar';
 import { selectServer } from '../../slices/selectedServerSlice';
 import CreateCategoryModal from '../ServerSettings/CreateCategoryModal';
 import ConfirmationDialog from '../Common/ConfirmationDialog';
+import ChannelChat from '../../pages/ChannelChat';
+import { Server } from '../../types/server';
+import { Channel } from '../../types/channel';
 
 const ServerDetail: React.FC = () => {
-  const [categories, setCategories] = useState<any[]>([]);
-  const [channels, setChannels] = useState<{ [key: string]: any[] }>({});
-  const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    []
+  );
+  const [channels, setChannels] = useState<{
+    [key: string]: { id: string; name: string }[];
+  }>({});
+  const [isDropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [newCategoryNameModal, setNewCategoryNameModal] =
     useState<boolean>(false);
   const [isConfirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
@@ -20,6 +28,7 @@ const ServerDetail: React.FC = () => {
     new Set()
   );
   const { permissions } = useSelector((state: RootState) => state.permissions);
+
   const selectedServer = useSelector(
     (state: RootState) => state.selectedServer
   );
@@ -67,7 +76,7 @@ const ServerDetail: React.FC = () => {
       setCategories(fetchedCategories);
 
       // Initialize an array to accumulate channels for all categories
-      const allChannels: { [key: string]: any[] } = {};
+      const allChannels: { [key: string]: { id: string; name: string }[] } = {};
 
       // Loop through the categories to fetch their channels
       for (let i = 0; i < fetchedCategories.length; i++) {
@@ -109,106 +118,129 @@ const ServerDetail: React.FC = () => {
   };
 
   return (
-    <div className="w-64 bg-bg-tertiary h-screen py-2">
-      <div
-        className="mb-2 px-4 py-2 bg-bg-secondary dark:bg-dark-secondary text-primary dark:text-dark-text-primary shadow-lg flex items-center justify-between cursor-pointer"
-        onClick={() => setDropdownOpen(!isDropdownOpen)}
-      >
-        <span className="font-semibold">{selectedServer.name}</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className={`w-5 h-5 transition-transform ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
+    <div className="flex flex-grow">
+      <div className="w-64 bg-bg-tertiary h-screen py-2">
+        <div
+          className="mb-2 px-4 py-2 bg-bg-secondary dark:bg-dark-secondary text-primary dark:text-dark-text-primary shadow-lg flex items-center justify-between cursor-pointer"
+          onClick={() => setDropdownOpen(!isDropdownOpen)}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-          />
-        </svg>
-      </div>
-
-      {isDropdownOpen && (
-        <div className="absolute z-30 left-1/6 transform -translate-x-1/6 w-60 bg-bg-secondary rounded-lg shadow-lg ml-2">
-          {owner && (
-            <div
-              className="px-4 py-2 hover:bg-hover-bg cursor-pointer"
-              onClick={() => navigate(`/settings/${selectedServer.id}`)}
-            >
-              Server Settings
-            </div>
-          )}
-          {(canManageChannels || canManageServer || owner) && (
-            <div
-              className="px-4 py-2 hover:bg-hover-bg cursor-pointer"
-              onClick={() => setNewCategoryNameModal(true)}
-            >
-              Create Category
-            </div>
-          )}
-          <div
-            className="px-4 py-2 text-red-500 hover:bg-hover-bg cursor-pointer"
-            onClick={() => {
-              setIsOwnerLeaving(owner);
-              setConfirmDialogOpen(true);
-            }}
+          <span className="font-semibold">{selectedServer.name}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className={`w-5 h-5 transition-transform ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
           >
-            Leave Server
-          </div>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+            />
+          </svg>
         </div>
-      )}
 
-      <CreateCategoryModal
-        isOpen={newCategoryNameModal}
-        onClose={() => setNewCategoryNameModal(false)}
-        server={selectedServer}
-        onCategoryCreated={fetchCategories}
-      />
-
-      <ConfirmationDialog
-        isOpen={isConfirmDialogOpen}
-        message={
-          isOwnerLeaving
-            ? 'You are the owner of this server. This action cannot be reversed, and all associated data will be deleted.'
-            : 'Are you sure you want to leave this server?'
-        }
-        onConfirm={confirmLeaveServer}
-        onCancel={() => setConfirmDialogOpen(false)}
-      />
-
-      {categories.map((category) => (
-        <div key={category.id} className="mb-4">
-          <div
-            className="flex items-center justify-between px-4 cursor-pointer"
-            onClick={() => toggleCategory(category.id)}
-          >
-            <span className="font-semibold">{category.name}</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className={`w-5 h-5 transition-transform ${expandedCategories.has(category.id) ? 'rotate-180' : 'rotate-90'}`}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 15l6-6 6 6"
-              />
-            </svg>
-          </div>
-          {expandedCategories.has(category.id) &&
-            channels[category.id]?.map((channel) => (
-              <div key={channel.id} className="ml-4 mt-2">
-                {channel.name}
+        {isDropdownOpen && (
+          <div className="absolute z-30 left-1/6 transform -translate-x-1/6 w-60 bg-bg-secondary rounded-lg shadow-lg ml-2">
+            {owner && (
+              <div
+                className="px-4 py-2 hover:bg-hover-bg cursor-pointer"
+                onClick={() => navigate(`/settings/${selectedServer.id}`)}
+              >
+                Server Settings
               </div>
-            ))}
-        </div>
-      ))}
+            )}
+            {(canManageChannels || canManageServer || owner) && (
+              <div
+                className="px-4 py-2 hover:bg-hover-bg cursor-pointer"
+                onClick={() => setNewCategoryNameModal(true)}
+              >
+                Create Category
+              </div>
+            )}
+            <div
+              className="px-4 py-2 text-red-500 hover:bg-hover-bg cursor-pointer"
+              onClick={() => {
+                setIsOwnerLeaving(owner);
+                setConfirmDialogOpen(true);
+              }}
+            >
+              Leave Server
+            </div>
+          </div>
+        )}
+
+        {selectedServer.id && (
+          <CreateCategoryModal
+            isOpen={newCategoryNameModal}
+            onClose={() => setNewCategoryNameModal(false)}
+            server={selectedServer as Server}
+            onCategoryCreated={fetchCategories}
+          />
+        )}
+
+        <ConfirmationDialog
+          isOpen={isConfirmDialogOpen}
+          message={
+            isOwnerLeaving
+              ? 'You are the owner of this server. This action cannot be reversed, and all associated data will be deleted.'
+              : 'Are you sure you want to leave this server?'
+          }
+          onConfirm={confirmLeaveServer}
+          onCancel={() => setConfirmDialogOpen(false)}
+        />
+
+        {categories.map((category) => (
+          <div key={category.id} className="mb-4">
+            <div
+              className="flex items-center justify-between px-4 cursor-pointer"
+              onClick={() => toggleCategory(category.id)}
+            >
+              <span className="font-semibold">{category.name}</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className={`w-5 h-5 transition-transform ${expandedCategories.has(category.id) ? 'rotate-180' : 'rotate-90'}`}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 15l6-6 6 6"
+                />
+              </svg>
+            </div>
+            {expandedCategories.has(category.id) &&
+              channels[category.id]?.map((channel) => (
+                <div
+                  key={channel.id}
+                  onClick={() => {
+                    const fullChannel = {
+                      ...channel,
+                      description: '', // Add default or fetched description
+                      members: [], // Add default or fetched members
+                      createdAt: new Date().toISOString(), // Add default or fetched createdAt
+                    };
+                    setSelectedChannel(fullChannel);
+                  }}
+                  className="ml-6 mt-2 text-secondary dark:text-dark-text-secondary cursor-pointer"
+                >
+                  {channel.name}
+                </div>
+              ))}
+          </div>
+        ))}
+      </div>
+      <div className="flex-grow">
+        {selectedChannel && (
+          <div className="flex-grow">
+            <ChannelChat channel={selectedChannel} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

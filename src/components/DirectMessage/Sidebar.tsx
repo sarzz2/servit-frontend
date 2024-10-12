@@ -3,13 +3,21 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../Store';
 import { useSnackbar } from '../Snackbar';
 import axiosInstance from '../../utils/axiosInstance';
+import { Friend } from '../../types/friends';
 
-const Sidebar = ({
+interface SidebarProps {
+  friends: Friend[];
+  setActiveChat: (user: Friend) => void;
+  setToUserId: (id: string) => void;
+  fetchFriends: (view: string) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({
   friends,
   setActiveChat,
   setToUserId,
   fetchFriends,
-}: any) => {
+}) => {
   const [view, setView] = useState('all');
   const user = useSelector((state: RootState) => state.user.user);
   const userId = user?.id;
@@ -67,7 +75,7 @@ const Sidebar = ({
       />
 
       <div className="flex flex-col space-y-2">
-        {friends.map((user: any) => (
+        {friends.map((user) => (
           <button
             key={user.username}
             className="flex items-center p-2 rounded-lg hover:bg-hover-bg dark:hover:bg-dark-hover"

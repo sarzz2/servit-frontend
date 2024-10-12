@@ -21,6 +21,7 @@ import PermissionRoute from './components/PermissionRoute';
 import ServerDetail from './components/Server/ServerDetail';
 import DirectMessage from './components/DirectMessage/DirectMessage';
 import ServerLayout from './pages/ServerLayout';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const App: React.FC = () => {
   const { theme } = useTheme();
@@ -84,7 +85,7 @@ const App: React.FC = () => {
               }
             >
               <Route path="direct" element={<DirectMessage />} />
-              <Route path=":serverId" element={<ServerDetail />} />
+              <Route path=":serverId" element={<ServerDetail />}></Route>
             </Route>
 
             <Route
