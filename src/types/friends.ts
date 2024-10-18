@@ -5,4 +5,5 @@ export interface Friend {
   friend_id: string;
   username: string;
   profile_picture_url: string;
+  status: string;
 }

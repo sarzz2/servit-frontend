@@ -5,16 +5,25 @@ import ChatWindow from './ChatWindow';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../Store';
 import { Friend } from '../../types/friends';
+import Friends from './Friends';
 
 const DirectMessageComponent = () => {
   const [activeChat, setActiveChat] = useState<Friend | null>(null);
   const [toUserId, setToUserId] = useState<string>('');
   const [friends, setFriends] = useState<Friend[]>([]);
+  const [friendsWindow, setFriendsWindow] = useState<boolean>(false);
   const user = useSelector((state: RootState) => state.user.user);
   const userId = user?.id;
 
   const fetchFriends = (type: string) => {
-    const endpoint = type === 'pending' ? '/friends/requests' : '/friends';
+    let endpoint = '';
+    if (type === 'pending') {
+      endpoint = '/friends/requests';
+    } else if (type === 'blocked') {
+      endpoint = '/friends/blocked';
+    } else {
+      endpoint = '/friends';
+    }
     axiosInstance
       .get(endpoint)
       .then((response) => {
@@ -35,23 +44,23 @@ const DirectMessageComponent = () => {
     fetchFriends('all');
   }, []);
 
-  const handleSetActiveChat = (user: Friend) => {
-    setActiveChat(user);
-  };
-
   return (
     <div className="flex h-screen w-full">
       <Sidebar
         friends={friends}
-        setActiveChat={handleSetActiveChat}
+        setFriendsWindow={setFriendsWindow}
+        setActiveChat={setActiveChat}
         setToUserId={setToUserId}
-        fetchFriends={fetchFriends}
       />
-      <ChatWindow
-        activeChat={activeChat || null}
-        toUserId={toUserId}
-        userId={userId}
-      />
+      {friendsWindow ? (
+        <Friends fetchFriends={fetchFriends} friends={friends} />
+      ) : (
+        <ChatWindow
+          activeChat={activeChat || null}
+          toUserId={toUserId}
+          userId={userId}
+        />
+      )}
     </div>
   );
 };
