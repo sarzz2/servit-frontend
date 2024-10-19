@@ -15,4 +15,8 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+export const goAxiosInstance = axios.create({
+  baseURL: 'http://localhost:8080/',
+});
+
 export default axiosInstance;

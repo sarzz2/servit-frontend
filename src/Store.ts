@@ -3,6 +3,7 @@ import authModalReducer from './slices/authModalSlice';
 import userReducer from './slices/userSlice';
 import selectedServerReducer from './slices/selectedServerSlice';
 import permissionsReducer from './slices/permissionsSlice';
+import onlineStatusReducer from './slices/onlineStatusSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     user: userReducer,
     selectedServer: selectedServerReducer,
     permissions: permissionsReducer,
+    onlineStatus: onlineStatusReducer,
   },
 });
 

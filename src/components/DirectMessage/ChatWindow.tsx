@@ -91,6 +91,10 @@ const ChatWindow = ({
     };
 
     socketRef.current.onclose = () => {
+      setMessages([]);
+      setHasMore(true);
+      setPage(2);
+      setLoadingMore(false);
       console.log('WebSocket closed');
       retryConnection();
     };
@@ -145,7 +149,6 @@ const ChatWindow = ({
 
   useEffect(() => {
     if (messages.length > 0 && page <= 2 && chatContainerRef.current) {
-      console.log('scroll');
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
@@ -225,6 +228,10 @@ const ChatWindow = ({
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       sendMessage();
+      // Scroll to the bottom after sending a message
+      setTimeout(() => {
+        messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     } else {
       handleTyping();
     }

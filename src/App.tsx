@@ -22,11 +22,31 @@ import ServerDetail from './components/Server/ServerDetail';
 import DirectMessage from './components/DirectMessage/DirectMessage';
 import ServerLayout from './pages/ServerLayout';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import { setUserOnlineStatus } from './slices/onlineStatusSlice';
+import { goAxiosInstance } from './utils/axiosInstance';
 
 const App: React.FC = () => {
   const { theme } = useTheme();
   const dispatch = useDispatch();
   const location = useLocation();
+
+  const fetchInitialOnlineStatuses = async () => {
+    goAxiosInstance
+      .get(`/friends/online?token=${localStorage.getItem('access_token')}`)
+      .then((response) => {
+        response.data.forEach((status: { userId: string; status: boolean }) => {
+          dispatch(
+            setUserOnlineStatus({
+              userId: status.userId,
+              status: status.status,
+            })
+          );
+        });
+      })
+      .catch((error) => {
+        console.error('Error fetching initial online statuses', error);
+      });
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -46,6 +66,26 @@ const App: React.FC = () => {
               profilePicture: response.data.profile_picture_url,
             })
           );
+          fetchInitialOnlineStatuses();
+
+          const socket = new WebSocket(
+            `ws://127.0.0.1:8080/ws/online?token=${token}`
+          );
+
+          // Listen for online status updates
+          socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            // Assuming the server sends data in format { userId: string, isOnline: boolean }
+            dispatch(
+              setUserOnlineStatus({
+                userId: data.userId,
+                status: data.status,
+              })
+            );
+          };
+          return () => {
+            socket.close();
+          };
         })
         .catch((error) => {
           console.error('Error fetching user data:', error);

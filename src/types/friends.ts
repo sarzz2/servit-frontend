@@ -1,4 +1,5 @@
 export interface Friend {
+  isOnline: any;
   id: string;
   name: string;
   user_id: string;

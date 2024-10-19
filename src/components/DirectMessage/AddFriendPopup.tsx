@@ -149,11 +149,10 @@ const AddFriendPopup: React.FC<AddFriendPopupProps> = ({ onClose }) => {
                       </button>
                     ) : user.status === 'accepted' ? (
                       <button
-                        className="ml-auto text-green-500 rounded-lg flex items-center"
+                        className="ml-auto text-red-500 rounded-lg flex items-center"
                         onClick={() => handleRemoveFriend(user.id)}
                       >
-                        <i className="fas fa-user-check mr-2"></i>
-                        Remove
+                        <i className="fas fa-user-xmark mr-2"></i>
                       </button>
                     ) : (
                       <button

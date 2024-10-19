@@ -25,7 +25,6 @@ const PermissionRoute: React.FC<PermissionRouteProps> = ({
   const { serverId } = useParams();
 
   useEffect(() => {
-    console.log('Fetching permissions');
     axiosInstance
       .get(`/servers/${serverId}/roles_permissions`)
       .then((response) => {

@@ -47,7 +47,6 @@ const DirectMessageComponent = () => {
   return (
     <div className="flex h-screen w-full">
       <Sidebar
-        friends={friends}
         setFriendsWindow={setFriendsWindow}
         setActiveChat={setActiveChat}
         setToUserId={setToUserId}
