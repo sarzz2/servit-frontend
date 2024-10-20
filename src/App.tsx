@@ -21,6 +21,7 @@ import PermissionRoute from './components/PermissionRoute';
 import ServerDetail from './components/Server/ServerDetail';
 import DirectMessage from './components/DirectMessage/DirectMessage';
 import ServerLayout from './pages/ServerLayout';
+import LoginPage from './pages/LoginPage';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { setUserOnlineStatus } from './slices/onlineStatusSlice';
 import { goAxiosInstance } from './utils/axiosInstance';
@@ -88,7 +89,11 @@ const App: React.FC = () => {
           };
         })
         .catch((error) => {
-          console.error('Error fetching user data:', error);
+          if (error.response && error.response.status === 401) {
+            dispatch(finishLoading());
+          } else {
+            console.error('Error fetching user data:', error);
+          }
         });
     } else {
       dispatch(finishLoading());
@@ -101,11 +106,14 @@ const App: React.FC = () => {
       <SnackbarProvider>
         <AuthPopup />
 
-        {location.pathname === '/' && <Header />}
+        {(location.pathname === '/' || location.pathname === '/login') && (
+          <Header />
+        )}
 
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/login" element={<LoginPage />} />
 
             {/* Routes that require authentication */}
             <Route
@@ -148,7 +156,9 @@ const App: React.FC = () => {
           </Routes>
         </main>
 
-        {location.pathname === '/' && <Footer />}
+        {(location.pathname === '/' || location.pathname === '/login') && (
+          <Footer />
+        )}
       </SnackbarProvider>
     </div>
   );
