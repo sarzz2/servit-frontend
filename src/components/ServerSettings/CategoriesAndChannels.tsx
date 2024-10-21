@@ -194,7 +194,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
           server={{
             id: server.id,
             name: server.name,
-            image: server.image,
+            server_picture_url: server.server_picture_url,
           }}
           onCategoryCreated={fetchCategories}
         />
@@ -216,13 +216,17 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
                       type="text"
                       value={editedCategoryName}
                       onChange={(e) => setEditedCategoryName(e.target.value)}
-                      className="w-full bg-bg-secondary dark:bg-dark-secondary border-none p-2 rounded-lg"
+                      className="w-full bg-bg-secondary dark:bg-dark-secondary border-2 border-gray-300 dark:border-white-600 outline-none p-2 rounded-lg"
                       placeholder="Enter category name"
                       autoFocus
                     />
                     <button
                       onClick={(e) => saveCategory(e, category.id)}
-                      className="text-green-500 mx-2"
+                      className={`mx-2 ${editedCategoryName === category.name || editedCategoryName.trim() === '' ? 'text-gray-500' : 'text-green-500'}`}
+                      disabled={
+                        editedCategoryName === category.name ||
+                        editedCategoryName.trim() === ''
+                      }
                     >
                       <i className="fas fa-lg fa-check" />
                     </button>
@@ -331,7 +335,13 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
                                 onClick={() =>
                                   editChannel(category.id, channel.id)
                                 }
-                                className="text-green-500 mx-2"
+                                className={`mx-2 ${editedCategoryName === category.name || editedCategoryName.trim() === '' ? 'text-gray-500' : 'text-green-500'}`}
+                                disabled={
+                                  (editedChannelName === channel.name &&
+                                    editedChannelDescription ===
+                                      channel.description) ||
+                                  editedChannelName.trim() === ''
+                                }
                               >
                                 <i className="fas fa-lg fa-check" />
                               </button>

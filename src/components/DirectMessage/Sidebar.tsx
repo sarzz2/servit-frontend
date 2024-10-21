@@ -49,7 +49,18 @@ const Sidebar: React.FC<SidebarProps> = ({
         <input
           type="text"
           placeholder="Find or start a conversation"
-          className="w-full p-2 rounded-lg bg-gray-200 dark:bg-dark-secondary mb-4"
+          className="w-full p-2 rounded-lg bg-gray-200 dark:bg-dark-secondary mb-4 outline-none"
+          onChange={(e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            if (searchTerm === '') {
+              fetchChatHistory();
+            } else {
+              const filteredChatHistory = chatHistory.filter((friend) =>
+                friend.username.toLowerCase().includes(searchTerm)
+              );
+              setChatHistory(filteredChatHistory);
+            }
+          }}
         />
 
         {/* Friends List */}
@@ -60,9 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => {
               setFriendsWindow(false);
               setActiveChat(friend);
-              // setToUserId(
-              //   friend.user_id === userId ? friend.friend_id : friend.user_id
-              // );
+
               setToUserId(friend.friend_id);
             }}
           >
