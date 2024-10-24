@@ -385,7 +385,7 @@ const ChatWindow = ({
           </div>
         </>
       ) : (
-        <p>Select a chat to start messaging...</p>
+        <></>
       )}
     </div>
   );

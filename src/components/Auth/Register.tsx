@@ -56,7 +56,7 @@ const Register: React.FC = () => {
       );
       showSnackbar('Registration successful!', 'success');
       dispatch(closeModal());
-      navigate('/profile');
+      navigate('/home');
     } catch (error: any) {
       showSnackbar(error.response.data.detail, 'error');
     }

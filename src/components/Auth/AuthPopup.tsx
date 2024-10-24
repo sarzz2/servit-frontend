@@ -28,7 +28,7 @@ const AuthPopup: React.FC = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-10">
       <div
         className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md w-[900px] flex flex-col"
         style={{ backgroundColor: 'var(--bg-primary)' }}

@@ -11,7 +11,7 @@ const DirectMessageComponent = () => {
   const [activeChat, setActiveChat] = useState<Friend | null>(null);
   const [toUserId, setToUserId] = useState<string>('');
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [friendsWindow, setFriendsWindow] = useState<boolean>(false);
+  const [friendsWindow, setFriendsWindow] = useState<boolean>(true);
   const user = useSelector((state: RootState) => state.user.user);
   const userId = user?.id;
 
