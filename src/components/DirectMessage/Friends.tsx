@@ -119,11 +119,20 @@ const Friends: React.FC<FriendsProps> = ({ friends, fetchFriends }) => {
                 key={friend.user_id}
                 className="relative flex items-center p-2 mb-2 bg-bg-secondary dark:bg-dark-secondary rounded-lg"
               >
-                <img
-                  src={friend.profile_picture_url}
-                  alt={`${friend.username}'s profile`}
-                  className="w-10 h-10 rounded-full mr-4"
-                />
+                {friend.profile_picture_url ? (
+                  <img
+                    src={friend.profile_picture_url}
+                    alt="profile"
+                    className="w-10 h-10 rounded-full mr-4"
+                  />
+                ) : (
+                  <button
+                    key={friend.id}
+                    className="diasbled w-10 h-10 mr-2 rounded-full flex items-center justify-center bg-bg-primary text-text-primary dark:bg-dark-primary dark:text-dark-text-primary"
+                  >
+                    {friend.username[0].toUpperCase()}
+                  </button>
+                )}
                 <span className="text-text-primary dark:text-dark-text-primary">
                   {friend.username}
                 </span>
@@ -170,11 +179,20 @@ const Friends: React.FC<FriendsProps> = ({ friends, fetchFriends }) => {
                 key={friend.user_id}
                 className="relative flex items-center p-2 mb-2 bg-bg-secondary dark:bg-dark-secondary rounded-lg"
               >
-                <img
-                  src={friend.profile_picture_url}
-                  alt={`${friend.username}'s profile`}
-                  className="w-10 h-10 rounded-full mr-4"
-                />
+                {friend.profile_picture_url ? (
+                  <img
+                    src={friend.profile_picture_url}
+                    alt="profile"
+                    className="w-10 h-10 rounded-full mr-4"
+                  />
+                ) : (
+                  <button
+                    key={friend.id}
+                    className="diasbled w-10 h-10 mr-2 rounded-full flex items-center justify-center bg-bg-primary text-text-primary dark:bg-dark-primary dark:text-dark-text-primary"
+                  >
+                    {friend.username[0].toUpperCase()}
+                  </button>
+                )}
                 <span className="text-text-primary dark:text-dark-text-primary">
                   {friend.username}
                 </span>
@@ -209,11 +227,20 @@ const Friends: React.FC<FriendsProps> = ({ friends, fetchFriends }) => {
                 key={friend.user_id}
                 className="relative flex items-center p-2 mb-2 bg-bg-secondary dark:bg-dark-secondary rounded-lg"
               >
-                <img
-                  src={friend.profile_picture_url}
-                  alt={`${friend.username}'s profile`}
-                  className="w-10 h-10 rounded-full mr-4"
-                />
+                {friend.profile_picture_url ? (
+                  <img
+                    src={friend.profile_picture_url}
+                    alt="profile"
+                    className="w-10 h-10 rounded-full mr-4"
+                  />
+                ) : (
+                  <button
+                    key={friend.id}
+                    className="diasbled w-10 h-10 mr-2 rounded-full flex items-center justify-center bg-bg-primary text-text-primary dark:bg-dark-primary dark:text-dark-text-primary"
+                  >
+                    {friend.username[0].toUpperCase()}
+                  </button>
+                )}
                 <span className="text-text-primary dark:text-dark-text-primary">
                   {friend.username}
                 </span>

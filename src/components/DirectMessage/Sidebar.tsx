@@ -23,7 +23,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     goAxiosInstance
       .get(`fetch_chat_history?token=${localStorage.getItem('access_token')}`)
       .then((response) => {
-        setChatHistory(response.data);
+        if (response.data != null) {
+          setChatHistory(response.data);
+        }
       })
       .catch((error) => {
         console.error('Error fetching chat history', error);

@@ -51,7 +51,7 @@ const ServerList: React.FC = () => {
     <div className="flex">
       <div className="w-16 h-screen flex flex-col items-center py-4 bg-bg-secondary dark:bg-dark-secondary">
         <button
-          className="w-12 h-12 mt-2 rounded-full flex items-center justify-center bg-bg-secondary dark:bg-dark-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover"
+          className="w-12 h-12 mt-2 rounded-full flex items-center justify-center bg-bg-primary dark:bg-dark-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover"
           onClick={() => {
             navigate('/home/direct');
             dispatch(selectServer({ id: '', name: '' }));
@@ -65,7 +65,7 @@ const ServerList: React.FC = () => {
         {servers.map((server) => (
           <button
             key={server.id}
-            className="w-12 h-12 mt-2 rounded-full flex items-center justify-center bg-bg-secondary text-text-primary dark:bg-dark-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover"
+            className="w-12 h-12 mt-2 rounded-full flex items-center justify-center bg-bg-primary text-text-primary dark:bg-dark-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover"
             onClick={() => handleSelectServer(server.id, server.name)}
           >
             {server.name[0].toUpperCase()}
@@ -74,7 +74,7 @@ const ServerList: React.FC = () => {
 
         {/* Add server button */}
         <button
-          className="w-12 h-12 mt-2 rounded-full flex items-center justify-center bg-bg-secondary dark:bg-dark-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover"
+          className="w-12 h-12 mt-2 rounded-full flex items-center justify-center bg-bg-primary dark:bg-dark-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover"
           onClick={() => setModalOpen(true)}
         >
           +
