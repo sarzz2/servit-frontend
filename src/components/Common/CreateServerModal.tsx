@@ -14,22 +14,52 @@ const CreateServerModal: React.FC<CreateServerModalProps> = ({
   onServerCreated,
 }) => {
   const [serverName, setServerName] = useState('');
+  const [serverPictureUrl, setServerPictureUrl] = useState<string | null>(null);
+  const [serverPictureFile, setServerPictureFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
 
-  const handleCreateServer = () => {
-    axiosInstance
-      .post('/servers/', { name: serverName })
-      .then(() => {
-        onServerCreated(); // Call to refetch servers after successful creation
-        setServerName('');
-        onClose(); // Close the modal
-        showSnackbar('Server created successfully!', 'success');
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.detail[0]?.msg || 'Error creating server';
-        showSnackbar(errorMessage, 'error');
+  const handleCreateServer = async () => {
+    try {
+      let uploadedImageUrl = serverPictureUrl;
+
+      // If there’s a selected image but it hasn’t been uploaded, upload it now
+      if (serverPictureFile && !uploadedImageUrl) {
+        const formData = new FormData();
+        formData.append('file', serverPictureFile);
+
+        const uploadResponse = await axiosInstance.post('/upload', formData);
+        uploadedImageUrl = uploadResponse.data.url;
+      }
+
+      await axiosInstance.post('/servers/', {
+        name: serverName,
+        server_picture_url: uploadedImageUrl,
       });
+
+      onServerCreated();
+      setServerName('');
+      setServerPictureUrl(null);
+      setServerPictureFile(null);
+      setImagePreview(null);
+      onClose();
+      showSnackbar('Server created successfully!', 'success');
+    } catch (error: any) {
+      showSnackbar(error.response?.data?.detail[0]?.msg, 'error');
+    }
+  };
+
+  const handleImagePreview = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setServerPictureFile(file); // Store the file temporarily without uploading
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string); // Set preview URL
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   if (!isModalOpen) return null; // Don't render anything if the modal is closed
@@ -46,7 +76,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = ({
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
           >
-            &#x2715; {/* Close icon */}
+            <i className="fas fa-lg fa-times"></i>
           </button>
         </div>
 
@@ -60,9 +90,22 @@ const CreateServerModal: React.FC<CreateServerModalProps> = ({
             htmlFor="serverIcon"
             className="w-24 h-24 rounded-full border-2 border-dashed border-accent-color flex items-center justify-center cursor-pointer hover:bg-hover-bg dark:hover:bg-dark-hover"
           >
-            <span className="text-accent-color">+</span>
+            {imagePreview ? (
+              <img
+                src={imagePreview}
+                alt="Server Icon"
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : (
+              <span className="text-accent-color">+</span>
+            )}
           </label>
-          <input id="serverIcon" type="file" className="hidden" />
+          <input
+            id="serverIcon"
+            type="file"
+            className="hidden"
+            onChange={handleImagePreview}
+          />
           <p className="mt-2 text-sm text-secondary dark:text-dark-text-secondary">
             Upload
           </p>
@@ -88,9 +131,12 @@ const CreateServerModal: React.FC<CreateServerModalProps> = ({
 
         <p className="text-xs text-secondary dark:text-dark-text-secondary mb-6">
           By creating a server, you agree to Servit's{' '}
-          {/* <a href="#" className="text-accent-color underline">
+          <button
+            onClick={() => (window.location.href = '/community-guidelines')}
+            className="text-accent-color underline bg-transparent border-none p-0 cursor-pointer"
+          >
             Community Guidelines
-          </a> */}
+          </button>
           .
         </p>
 
