@@ -16,7 +16,11 @@ const ServerDetail: React.FC = () => {
     []
   );
   const [channels, setChannels] = useState<{
-    [key: string]: { id: string; name: string }[];
+    [key: string]: {
+      description: any;
+      id: string;
+      name: string;
+    }[];
   }>({});
   const [isDropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
@@ -76,7 +80,9 @@ const ServerDetail: React.FC = () => {
       setCategories(fetchedCategories);
 
       // Initialize an array to accumulate channels for all categories
-      const allChannels: { [key: string]: { id: string; name: string }[] } = {};
+      const allChannels: {
+        [key: string]: { description: string; id: string; name: string }[];
+      } = {};
 
       // Loop through the categories to fetch their channels
       for (let i = 0; i < fetchedCategories.length; i++) {
@@ -85,7 +91,12 @@ const ServerDetail: React.FC = () => {
         );
 
         // Store channels for the current category in the allChannels object
-        allChannels[fetchedCategories[i].id] = channelsResponse.data;
+        allChannels[fetchedCategories[i].id] = channelsResponse.data.map(
+          (channel: { description: string; id: string; name: string }) => ({
+            ...channel,
+            description: channel.description || '', // Add a default description if not present
+          })
+        );
       }
 
       // Set the accumulated channels in the state
@@ -220,7 +231,7 @@ const ServerDetail: React.FC = () => {
                   onClick={() => {
                     const fullChannel = {
                       ...channel,
-                      description: '', // Add default or fetched description
+                      description: channel.description,
                       members: [], // Add default or fetched members
                       createdAt: new Date().toISOString(), // Add default or fetched createdAt
                     };

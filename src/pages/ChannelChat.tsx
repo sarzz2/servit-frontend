@@ -45,7 +45,7 @@ const ChannelChat: React.FC<ChannelChatProps> = ({ channel }) => {
 
   return (
     <div className="w-full h-screen p-4 bg-bg-primary dark:bg-dark-primary flex flex-col">
-      <div className="flex flex-row items-center justify-between">
+      <div className="flex flex-row items-center mb-2 justify-between">
         <div className="flex flex-row items-center">
           <h1 className="text-xl text-primary dark:text-dark-text-primary">
             #{channel.name}

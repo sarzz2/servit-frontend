@@ -3,6 +3,7 @@ import { Friend } from '../../types/friends';
 import { selectOnlineUsers } from '../../slices/onlineStatusSlice';
 import { goAxiosInstance } from '../../utils/axiosInstance';
 import { useEffect, useState } from 'react';
+import UserBar from '../User/UserBar';
 
 interface SidebarProps {
   setActiveChat: (user: Friend) => void;
@@ -37,8 +38,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, []);
 
   return (
-    <div className="w-80 bg-bg-tertiary dark:bg-bg-tertiary p-4">
-      <div className="flex flex-col space-y-2">
+    <div className="w-80 relative bg-bg-tertiary dark:bg-bg-tertiary">
+      <div className="flex flex-col space-y-2 p-4">
         <button
           className="flex items-center p-2 rounded-lg hover:bg-hover-bg dark:hover:bg-dark-hover"
           onClick={() => setFriendsWindow(true)}
@@ -95,6 +96,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         ))}
       </div>
+      <UserBar />
     </div>
   );
 };

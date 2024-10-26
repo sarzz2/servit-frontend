@@ -19,6 +19,7 @@ module.exports = {
         'button-hover': 'var(--button-hover)',
         'accent-color': 'var(--accent-color)',
         'hover-bg': 'var(--hover-bg)',
+        'box-primary': 'var(--box-primary)',
         'dark-primary': 'var(--bg-primary)',
         'dark-secondary': 'var(--bg-secondary)',
         'dark-tertiary': 'var(--bg-tertiary)',
