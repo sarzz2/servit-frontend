@@ -1,5 +1,5 @@
 export interface Server {
   id: string;
   name: string;
-  image: string | null;
+  server_picture_url: string | null;
 }

@@ -8,7 +8,13 @@ import { useNavigate } from 'react-router-dom';
 import CreateServerModal from '../Common/CreateServerModal';
 
 const ServerList: React.FC = () => {
-  const [servers, setServers] = useState<{ id: string; name: string }[]>([]);
+  const [servers, setServers] = useState<
+    {
+      server_picture_url: string;
+      id: string;
+      name: string;
+    }[]
+  >([]);
   const [isModalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
@@ -68,7 +74,15 @@ const ServerList: React.FC = () => {
             className="w-12 h-12 mt-2 rounded-full flex items-center justify-center bg-bg-primary text-text-primary dark:bg-dark-primary dark:text-dark-text-primary hover:bg-button-hover dark:hover:bg-dark-button-hover"
             onClick={() => handleSelectServer(server.id, server.name)}
           >
-            {server.name[0].toUpperCase()}
+            {server.server_picture_url ? (
+              <img
+                src={server.server_picture_url}
+                alt={server.name}
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : (
+              server.name[0].toUpperCase()
+            )}
           </button>
         ))}
 

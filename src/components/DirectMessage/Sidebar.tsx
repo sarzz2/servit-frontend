@@ -3,6 +3,7 @@ import { Friend } from '../../types/friends';
 import { selectOnlineUsers } from '../../slices/onlineStatusSlice';
 import { goAxiosInstance } from '../../utils/axiosInstance';
 import { useEffect, useState } from 'react';
+import UserBar from '../User/UserBar';
 
 interface SidebarProps {
   setActiveChat: (user: Friend) => void;
@@ -37,8 +38,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, []);
 
   return (
-    <div className="w-80 bg-bg-tertiary dark:bg-bg-tertiary p-4">
-      <div className="flex flex-col space-y-2">
+    <div className="w-80 relative bg-bg-tertiary dark:bg-bg-tertiary">
+      <div className="flex flex-col space-y-2 p-4">
         <button
           className="flex items-center p-2 rounded-lg hover:bg-hover-bg dark:hover:bg-dark-hover"
           onClick={() => setFriendsWindow(true)}
@@ -49,7 +50,18 @@ const Sidebar: React.FC<SidebarProps> = ({
         <input
           type="text"
           placeholder="Find or start a conversation"
-          className="w-full p-2 rounded-lg bg-gray-200 dark:bg-dark-secondary mb-4"
+          className="w-full p-2 rounded-lg bg-gray-200 dark:bg-dark-secondary mb-4 outline-none"
+          onChange={(e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            if (searchTerm === '') {
+              fetchChatHistory();
+            } else {
+              const filteredChatHistory = chatHistory.filter((friend) =>
+                friend.username.toLowerCase().includes(searchTerm)
+              );
+              setChatHistory(filteredChatHistory);
+            }
+          }}
         />
 
         {/* Friends List */}
@@ -60,9 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => {
               setFriendsWindow(false);
               setActiveChat(friend);
-              // setToUserId(
-              //   friend.user_id === userId ? friend.friend_id : friend.user_id
-              // );
+
               setToUserId(friend.friend_id);
             }}
           >
@@ -86,6 +96,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         ))}
       </div>
+      <UserBar />
     </div>
   );
 };
