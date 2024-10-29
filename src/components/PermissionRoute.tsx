@@ -25,20 +25,21 @@ const PermissionRoute: React.FC<PermissionRouteProps> = ({
   const { serverId } = useParams();
 
   useEffect(() => {
-    axiosInstance
-      .get(`/servers/${serverId}/roles_permissions`)
-      .then((response) => {
+    const fetchPermissions = async () => {
+      try {
+        const response = await axiosInstance.get(
+          `/servers/${serverId}/roles_permissions`
+        );
         dispatch(setPermissions(response.data));
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error(error);
         showSnackbar('Error loading permissions', 'error');
-      });
-    if (permissions.length > 0) {
-      setIsLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPermissions();
+  }, [dispatch, serverId, showSnackbar]);
 
   const hasPermission = requiredPermissions.some((permission) =>
     permissionSet.has(permission)
@@ -50,6 +51,7 @@ const PermissionRoute: React.FC<PermissionRouteProps> = ({
   }
 
   if (!hasPermission) {
+    showSnackbar('You do not have access to this page', 'error');
     return <Navigate to="/home" replace />;
   }
 
