@@ -12,6 +12,7 @@ import { Server } from '../../types/server';
 import { Channel } from '../../types/channel';
 import { fetchPermissions } from '../../utils/fetchPermissions';
 import { setPermissions } from '../../slices/permissionsSlice';
+import UserBar from '../User/UserBar';
 
 const ServerDetail: React.FC = () => {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
@@ -145,7 +146,7 @@ const ServerDetail: React.FC = () => {
 
   return (
     <div className="flex flex-grow">
-      <div className="w-64 bg-bg-tertiary h-screen py-2">
+      <div className="w-64 relative bg-bg-tertiary h-screen py-2">
         <div
           className="mb-2 px-4 py-2 bg-bg-secondary dark:bg-dark-secondary text-primary dark:text-dark-text-primary shadow-lg flex items-center justify-between cursor-pointer"
           onClick={() => setDropdownOpen(!isDropdownOpen)}
@@ -259,6 +260,7 @@ const ServerDetail: React.FC = () => {
               ))}
           </div>
         ))}
+        <UserBar />
       </div>
       <div className="flex-grow">
         {selectedChannel && (
