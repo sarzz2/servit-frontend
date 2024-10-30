@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setPermissions } from '../slices/permissionsSlice';
 import { useSnackbar } from './Snackbar';
 import { RootState } from '../Store';
-import axiosInstance from '../utils/axiosInstance';
+import { fetchPermissions } from '../utils/fetchPermissions';
 
 interface PermissionRouteProps {
   children: JSX.Element;
@@ -25,12 +25,10 @@ const PermissionRoute: React.FC<PermissionRouteProps> = ({
   const { serverId } = useParams();
 
   useEffect(() => {
-    const fetchPermissions = async () => {
+    const loadPermissions = async () => {
       try {
-        const response = await axiosInstance.get(
-          `/servers/${serverId}/roles_permissions`
-        );
-        dispatch(setPermissions(response.data));
+        const permissions = await fetchPermissions(serverId);
+        dispatch(setPermissions(permissions));
       } catch (error) {
         console.error(error);
         showSnackbar('Error loading permissions', 'error');
@@ -38,7 +36,8 @@ const PermissionRoute: React.FC<PermissionRouteProps> = ({
         setIsLoading(false);
       }
     };
-    fetchPermissions();
+
+    loadPermissions();
   }, [dispatch, serverId, showSnackbar]);
 
   const hasPermission = requiredPermissions.some((permission) =>

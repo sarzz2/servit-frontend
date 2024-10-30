@@ -10,6 +10,8 @@ import ConfirmationDialog from '../Common/ConfirmationDialog';
 import ChannelChat from '../../pages/ChannelChat';
 import { Server } from '../../types/server';
 import { Channel } from '../../types/channel';
+import { fetchPermissions } from '../../utils/fetchPermissions';
+import { setPermissions } from '../../slices/permissionsSlice';
 
 const ServerDetail: React.FC = () => {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
@@ -67,6 +69,19 @@ const ServerDetail: React.FC = () => {
         }
       }
     };
+    const loadPermissions = async () => {
+      if (permissionSet.size === 0) {
+        try {
+          const permissions = await fetchPermissions(serverId);
+          dispatch(setPermissions(permissions));
+        } catch (error) {
+          console.error(error);
+          showSnackbar('Error loading permissions', 'error');
+        }
+      }
+    };
+
+    loadPermissions();
     fetchData();
     fetchCategories();
 
