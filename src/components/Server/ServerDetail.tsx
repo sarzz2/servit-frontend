@@ -13,6 +13,7 @@ import { Channel } from '../../types/channel';
 import { fetchPermissions } from '../../utils/fetchPermissions';
 import { setPermissions } from '../../slices/permissionsSlice';
 import UserBar from '../User/UserBar';
+import eventEmitter from '../../utils/eventEmitter';
 
 const ServerDetail: React.FC = () => {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
@@ -135,6 +136,7 @@ const ServerDetail: React.FC = () => {
   const confirmLeaveServer = async () => {
     try {
       await axiosInstance.post(`/servers/leave/${selectedServer.id}`);
+      eventEmitter.emit('leaveServer', { serverId: selectedServer.id });
       showSnackbar('Left server successfully', 'success');
       navigate('/home');
     } catch (error) {
