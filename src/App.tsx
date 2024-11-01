@@ -35,14 +35,18 @@ const App: React.FC = () => {
     goAxiosInstance
       .get(`/friends/online?token=${localStorage.getItem('access_token')}`)
       .then((response) => {
-        response.data.forEach((status: { userId: string; status: boolean }) => {
-          dispatch(
-            setUserOnlineStatus({
-              userId: status.userId,
-              status: status.status,
-            })
+        if (response.data) {
+          response.data.forEach(
+            (status: { userId: string; status: boolean }) => {
+              dispatch(
+                setUserOnlineStatus({
+                  userId: status.userId,
+                  status: status.status,
+                })
+              );
+            }
           );
-        });
+        }
       })
       .catch((error) => {
         console.error('Error fetching initial online statuses', error);
