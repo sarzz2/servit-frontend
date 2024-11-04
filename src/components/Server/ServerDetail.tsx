@@ -264,13 +264,11 @@ const ServerDetail: React.FC = () => {
         ))}
         <UserBar />
       </div>
-      <div className="flex-grow">
-        {selectedChannel && (
-          <div className="flex-grow">
-            <ChannelChat channel={selectedChannel} />
-          </div>
-        )}
-      </div>
+      {selectedChannel && (
+        <div className="flex-grow">
+          <ChannelChat channel={selectedChannel} />
+        </div>
+      )}
     </div>
   );
 };
