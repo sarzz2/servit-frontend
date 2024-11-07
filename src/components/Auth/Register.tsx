@@ -76,10 +76,12 @@ const Register: React.FC = () => {
             <label
               className="block text-sm font-medium"
               style={{ color: 'var(--text-primary)' }}
+              htmlFor="username"
             >
               Username
             </label>
             <input
+              id="username"
               type="text"
               className={`w-full p-2 border rounded ${
                 errors.username ? 'border-red-500' : 'border-gray-300'
@@ -95,10 +97,12 @@ const Register: React.FC = () => {
             <label
               className="block text-sm font-medium"
               style={{ color: 'var(--text-primary)' }}
+              htmlFor="email"
             >
               Email
             </label>
             <input
+              id="email"
               type="email"
               className={`w-full p-2 border rounded ${
                 errors.email ? 'border-red-500' : 'border-gray-300'
@@ -114,10 +118,12 @@ const Register: React.FC = () => {
             <label
               className="block text-sm font-medium"
               style={{ color: 'var(--text-primary)' }}
+              htmlFor="password"
             >
               Password
             </label>
             <input
+              id="password"
               type="password"
               className={`w-full p-2 border rounded ${
                 errors.password ? 'border-red-500' : 'border-gray-300'
@@ -133,10 +139,12 @@ const Register: React.FC = () => {
             <label
               className="block text-sm font-medium"
               style={{ color: 'var(--text-primary)' }}
+              htmlFor="confirmpassword"
             >
               Confirm Password
             </label>
             <input
+              id="confirmpassword"
               type="password"
               className={`w-full p-2 border rounded ${
                 errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
