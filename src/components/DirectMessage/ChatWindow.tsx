@@ -7,14 +7,12 @@ import { useSnackbar } from '../Snackbar';
 const ChatWindow = ({
   activeChat,
   toUserId,
-  userId,
 }: {
   activeChat: {
     profile_picture_url: string;
     username: string;
   } | null;
   toUserId: string;
-  userId: string | undefined;
 }) => {
   const user = useSelector((state: RootState) => state.user.user);
   const [message, setMessage] = useState('');
@@ -39,6 +37,7 @@ const ChatWindow = ({
   const typingTimeoutRef = useRef<number | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const { showSnackbar } = useSnackbar();
+  const userId = user?.id;
 
   const connectWebSocket = () => {
     const wsUrl = `ws://localhost:8080?from_user_id=${userId}&to_user_id=${toUserId}&token=${localStorage.getItem('access_token')}`;

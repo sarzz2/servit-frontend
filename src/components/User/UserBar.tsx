@@ -60,13 +60,15 @@ const UserBar: React.FC = () => {
           >
             <ul>
               <li
-                className="p-2 cursor-pointer hover:bg-hover-bg"
+                className="p-3 cursor-pointer hover:bg-hover-bg"
                 onClick={() => navigate('/profile')}
               >
                 User Profile
               </li>
-              <li className="p-2 cursor-pointer hover:bg-hover-bg">Settings</li>
-              <li className="p-2 cursor-pointer hover:bg-hover-bg">Logout</li>
+              <li className="p-3 cursor-pointer hover:bg-hover-bg">Settings</li>
+              <li className="p-3 cursor-pointer text-red-600 hover:bg-hover-bg">
+                Logout
+              </li>
             </ul>
           </div>
         )}

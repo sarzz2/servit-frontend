@@ -12,6 +12,8 @@ import { Server } from '../../types/server';
 import { Channel } from '../../types/channel';
 import { fetchPermissions } from '../../utils/fetchPermissions';
 import { setPermissions } from '../../slices/permissionsSlice';
+import UserBar from '../User/UserBar';
+import eventEmitter from '../../utils/eventEmitter';
 
 const ServerDetail: React.FC = () => {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
@@ -134,6 +136,7 @@ const ServerDetail: React.FC = () => {
   const confirmLeaveServer = async () => {
     try {
       await axiosInstance.post(`/servers/leave/${selectedServer.id}`);
+      eventEmitter.emit('leaveServer', { serverId: selectedServer.id });
       showSnackbar('Left server successfully', 'success');
       navigate('/home');
     } catch (error) {
@@ -145,7 +148,7 @@ const ServerDetail: React.FC = () => {
 
   return (
     <div className="flex flex-grow">
-      <div className="w-64 bg-bg-tertiary h-screen py-2">
+      <div className="w-64 relative bg-bg-tertiary h-screen py-2">
         <div
           className="mb-2 px-4 py-2 bg-bg-secondary dark:bg-dark-secondary text-primary dark:text-dark-text-primary shadow-lg flex items-center justify-between cursor-pointer"
           onClick={() => setDropdownOpen(!isDropdownOpen)}
@@ -259,14 +262,13 @@ const ServerDetail: React.FC = () => {
               ))}
           </div>
         ))}
+        <UserBar />
       </div>
-      <div className="flex-grow">
-        {selectedChannel && (
-          <div className="flex-grow">
-            <ChannelChat channel={selectedChannel} />
-          </div>
-        )}
-      </div>
+      {selectedChannel && (
+        <div className="flex-grow">
+          <ChannelChat channel={selectedChannel} />
+        </div>
+      )}
     </div>
   );
 };

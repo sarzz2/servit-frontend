@@ -6,6 +6,7 @@ import { selectServer } from '../../slices/selectedServerSlice';
 import { setPermissions } from '../../slices/permissionsSlice';
 import { useNavigate } from 'react-router-dom';
 import CreateServerModal from '../Common/CreateServerModal';
+import eventEmitter from '../../utils/eventEmitter';
 
 const ServerList: React.FC = () => {
   const [servers, setServers] = useState<
@@ -22,8 +23,19 @@ const ServerList: React.FC = () => {
 
   useEffect(() => {
     fetchServers();
+
+    eventEmitter.on('leaveServer', handleMyEvent);
+    return () => {
+      eventEmitter.off('leaveServer', handleMyEvent);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleMyEvent = (data: any) => {
+    setServers((prevServers) =>
+      prevServers.filter((server) => server.id !== data.serverId)
+    );
+  };
 
   const fetchServers = () => {
     axiosInstance

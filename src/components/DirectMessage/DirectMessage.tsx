@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import Sidebar from './Sidebar';
 import ChatWindow from './ChatWindow';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../Store';
 import { Friend } from '../../types/friends';
 import Friends from './Friends';
 
@@ -12,8 +10,6 @@ const DirectMessageComponent = () => {
   const [toUserId, setToUserId] = useState<string>('');
   const [friends, setFriends] = useState<Friend[]>([]);
   const [friendsWindow, setFriendsWindow] = useState<boolean>(true);
-  const user = useSelector((state: RootState) => state.user.user);
-  const userId = user?.id;
 
   const fetchFriends = (type: string) => {
     let endpoint = '';
@@ -54,11 +50,7 @@ const DirectMessageComponent = () => {
       {friendsWindow ? (
         <Friends fetchFriends={fetchFriends} friends={friends} />
       ) : (
-        <ChatWindow
-          activeChat={activeChat || null}
-          toUserId={toUserId}
-          userId={userId}
-        />
+        <ChatWindow activeChat={activeChat || null} toUserId={toUserId} />
       )}
     </div>
   );
