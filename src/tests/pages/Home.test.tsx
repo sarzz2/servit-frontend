@@ -6,7 +6,6 @@ import HomePage from '../../pages/Home';
 import { openModal } from '../../slices/authModalSlice';
 import { useInView } from 'react-intersection-observer';
 import { useNavigate } from 'react-router-dom';
-import '@testing-library/jest-dom';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

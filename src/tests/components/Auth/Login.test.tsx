@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../utils/axiosInstance';
 import MockAdapter from 'axios-mock-adapter';
 import { setUser } from '../../../slices/userSlice';
-import '@testing-library/jest-dom';
 import { openModal } from '../../../slices/authModalSlice';
 
 const mockStore = configureStore([]);
