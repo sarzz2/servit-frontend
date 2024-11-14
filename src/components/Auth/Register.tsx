@@ -58,7 +58,7 @@ const Register: React.FC = () => {
       dispatch(closeModal());
       navigate('/home');
     } catch (error: any) {
-      showSnackbar(error.response.data.detail, 'error');
+      showSnackbar(error.response.data.detail.msg, 'error');
     }
   };
 
