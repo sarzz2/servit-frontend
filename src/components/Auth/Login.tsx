@@ -35,9 +35,10 @@ const Login: React.FC = () => {
   const onSubmit = async (data: LoginFormValues) => {
     try {
       const response = await axiosInstance.post('/users/login', data);
-      const token = response.data.access_token;
       // Store token in localStorage
-      localStorage.setItem('access_token', token);
+      localStorage.setItem('access_token', response.data.access_token);
+      localStorage.setItem('refresh_token', response.data.refresh_token);
+
       showSnackbar('Login successful!', 'success');
       dispatch(
         setUser({

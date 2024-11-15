@@ -80,23 +80,69 @@ const App: React.FC = () => {
           // Listen for online status updates
           socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            // Assuming the server sends data in format { userId: string, isOnline: boolean }
             dispatch(
-              setUserOnlineStatus({
-                userId: data.userId,
-                status: data.status,
-              })
+              setUserOnlineStatus({ userId: data.userId, status: data.status })
             );
           };
           return () => {
             socket.close();
           };
         })
-        .catch((error) => {
+        .catch(async (error) => {
           if (error.response && error.response.status === 401) {
-            dispatch(finishLoading());
+            // Attempt to refresh the access token
+            const refreshToken = localStorage.getItem('refresh_token');
+            if (refreshToken) {
+              try {
+                const refreshResponse = await axiosInstance.post(
+                  '/users/token/refresh',
+                  {},
+                  {
+                    headers: {
+                      'refresh-token': refreshToken,
+                    },
+                  }
+                );
+
+                // Store the new access token
+                const newAccessToken = refreshResponse.data.access_token;
+                localStorage.setItem('access_token', newAccessToken);
+                localStorage.setItem(
+                  'refresh_token',
+                  refreshResponse.data.refresh_token
+                );
+
+                const retryResponse = await axiosInstance.get('/users/me', {
+                  headers: {
+                    Authorization: `Bearer ${newAccessToken}`,
+                  },
+                });
+
+                // Update Redux state with new user data
+                dispatch(
+                  setUser({
+                    email: retryResponse.data.email,
+                    username: retryResponse.data.username,
+                    id: retryResponse.data.id,
+                    profilePicture: retryResponse.data.profile_picture_url,
+                  })
+                );
+
+                fetchInitialOnlineStatuses();
+              } catch (refreshError) {
+                // If refresh token has expired or is invalid
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                dispatch(finishLoading());
+                // showSnackbar('Session expired. Please log in again.', 'error');
+              }
+            } else {
+              // No refresh token available
+              dispatch(finishLoading());
+            }
           } else {
             console.error('Error fetching user data:', error);
+            dispatch(finishLoading());
           }
         });
     } else {
