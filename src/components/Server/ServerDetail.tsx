@@ -35,6 +35,8 @@ const ServerDetail: React.FC = () => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set()
   );
+  const [isConfirmModalButtonDisable, setIsConfirmModalButtonDisable] =
+    useState<boolean>(false);
   const { permissions } = useSelector((state: RootState) => state.permissions);
 
   const selectedServer = useSelector(
@@ -135,14 +137,18 @@ const ServerDetail: React.FC = () => {
 
   const confirmLeaveServer = async () => {
     try {
+      setIsConfirmModalButtonDisable(true);
       await axiosInstance.post(`/servers/leave/${selectedServer.id}`);
       eventEmitter.emit('leaveServer', { serverId: selectedServer.id });
+      setIsConfirmModalButtonDisable(false);
       showSnackbar('Left server successfully', 'success');
       navigate('/home');
     } catch (error) {
       showSnackbar('Error leaving server', 'error');
+      setIsConfirmModalButtonDisable(false);
     } finally {
       setConfirmDialogOpen(false);
+      setIsConfirmModalButtonDisable(false);
     }
   };
 
@@ -218,6 +224,7 @@ const ServerDetail: React.FC = () => {
           }
           onConfirm={confirmLeaveServer}
           onCancel={() => setConfirmDialogOpen(false)}
+          disable={isConfirmModalButtonDisable}
         />
 
         {categories.map((category) => (

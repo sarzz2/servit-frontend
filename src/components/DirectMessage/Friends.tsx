@@ -15,6 +15,8 @@ const Friends: React.FC<FriendsProps> = ({ friends, fetchFriends }) => {
   const [openOptions, setOpenOptions] = useState<string | null>(null);
   const [isConfirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
   const [showAddFriendPopup, setShowAddFriendPopup] = useState(false);
+  const [isConfirmModalButtonDisable, setIsConfirmModalButtonDisable] =
+    useState<boolean>(false);
   const { showSnackbar } = useSnackbar();
   const optionsRef = useRef<HTMLDivElement | null>(null);
 
@@ -67,12 +69,15 @@ const Friends: React.FC<FriendsProps> = ({ friends, fetchFriends }) => {
 
   const handleRemoveFriend = async () => {
     try {
+      setIsConfirmModalButtonDisable(true);
       await axiosInstance.patch(`/friends/${openOptions}/rejected`);
       setOpenOptions(null);
       fetchFriends(view);
       showSnackbar('Friend removed Succesfully!', 'success');
+      setIsConfirmModalButtonDisable(false);
     } catch (error) {
       showSnackbar('An error occurred. Please try again.', 'error');
+      setIsConfirmModalButtonDisable(false);
       console.error('Error removing friend:', error);
     }
   };
@@ -165,6 +170,7 @@ const Friends: React.FC<FriendsProps> = ({ friends, fetchFriends }) => {
                       message={`Are you sure you want to remove ${friend.username} from your friend list?`}
                       onConfirm={handleRemoveFriend}
                       onCancel={() => setConfirmDialogOpen(false)}
+                      disable={isConfirmModalButtonDisable}
                     />
                   </div>
                 )}
