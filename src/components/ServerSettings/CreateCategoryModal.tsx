@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { useSnackbar } from '../Snackbar';
 import { Server } from '../../types/server';
@@ -17,7 +17,17 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   onCategoryCreated,
 }) => {
   const [categoryName, setCategoryName] = useState('');
+  const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(false);
   const { showSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    console.log(categoryName);
+    if (categoryName) {
+      setIsButtonDisabled(false);
+    } else {
+      setIsButtonDisabled(true);
+    }
+  }, [categoryName]);
 
   const handleSubmit = () => {
     axiosInstance
@@ -67,7 +77,8 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
           </button>
           <button
             onClick={handleSubmit}
-            className="bg-button-primary hover:bg-button-hover px-4 py-2 rounded-lg"
+            className="bg-button-primary hover:bg-button-hover px-4 py-2 rounded-lg disabled:bg-gray-500 disabled:cursor-not-allowed"
+            disabled={isButtonDisabled}
           >
             Create Category
           </button>
