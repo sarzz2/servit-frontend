@@ -26,6 +26,11 @@ const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
     return setIsCreateButtonDisable(true);
   }, [channelName, channelDescription]);
 
+  const handleCreate = () => {
+    modalClose();
+    handleCreateChannel({ channelName, channelDescription });
+  };
+
   const modalClose = () => {
     setChannelName('');
     setChannelDescription('');
@@ -53,9 +58,7 @@ const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
             />
             <div className="flex justify-end">
               <button
-                onClick={() =>
-                  handleCreateChannel({ channelName, channelDescription })
-                }
+                onClick={() => handleCreate()}
                 className="bg-button-primary  hover:bg-button-hover px-4 py-2 rounded disabled:bg-gray-500 disabled:cursor-not-allowed"
                 disabled={isCreateButtonDisable}
               >
