@@ -264,31 +264,34 @@ const ServerDetail: React.FC = () => {
           onCancel={() => setConfirmDialogOpen(false)}
           disable={isConfirmModalButtonDisable}
         />
-
-        {categories.map((category) => (
-          <div key={category.id} className="mb-4">
-            <div
-              className="flex items-center justify-between p-2 bg-slate-400 cursor-pointer"
-              onClick={() => toggleCategory(category.id)}
-            >
-              <span className="font-semibold capitalize">{category.name}</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className={`w-5 h-5 transition-transform ${expandedCategories.has(category.id) ? 'rotate-180' : 'rotate-90'}`}
+        <div className="h-[calc(100%-104px)] overflow-auto scrol">
+          {categories.map((category) => (
+            <div key={category.id} className="m-1">
+              <div
+                className="flex items-center justify-between p-2 bg-slate-400 cursor-pointer rounded-md"
+                onClick={() => toggleCategory(category.id)}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 15l6-6 6 6"
-                />
-              </svg>
-            </div>
-            {expandedCategories.has(category.id) && (
-              <>
+                <span className="font-semibold capitalize">
+                  {category.name}
+                </span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className={`w-5 h-5 transition-transform ${expandedCategories.has(category.id) ? 'rotate-180' : 'rotate-90'}`}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 15l6-6 6 6"
+                  />
+                </svg>
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out bg-gray-300 rounded-b-md ${expandedCategories.has(category.id) ? 'max-h-screen pt-4' : 'max-h-0 pt-0'} `}
+              >
                 {channels[category.id]?.map((channel) => (
                   <div
                     key={channel.id}
@@ -301,7 +304,7 @@ const ServerDetail: React.FC = () => {
                       };
                       setSelectedChannel(fullChannel);
                     }}
-                    className="ml-6 p-2 text-secondary dark:text-dark-text-secondary cursor-pointer border-b border-gray-300 hover:bg-orange-300  hover:border-transparent transition-transform hover:font-bold capitalize"
+                    className="pl-6 p-2 text-secondary dark:text-dark-text-secondary cursor-pointer border-b border-gray-300 hover:bg-orange-300  hover:border-transparent transition-transform hover:font-bold capitalize"
                   >
                     {channel.name}
                   </div>
@@ -309,16 +312,16 @@ const ServerDetail: React.FC = () => {
 
                 {(canManageChannels || canManageServer || owner) && (
                   <div
-                    className="ml-6 p-2 text-secondary dark:text-dark-text-secondary cursor-pointer border-b border-gray-300 hover:bg-orange-300 hover:border-transparent transition-transform hover:font-bold "
+                    className="pl-6 p-2 text-secondary bg-gray-300 dark:text-dark-text-secondary cursor-pointer border-b border-gray-300 hover:bg-orange-300 hover:border-transparent transition-transform hover:font-bold "
                     onClick={() => handleCreateChannel(category.id)}
                   >
                     + Create Channel
                   </div>
                 )}
-              </>
-            )}
-          </div>
-        ))}
+              </div>
+            </div>
+          ))}
+        </div>
         <UserBar />
       </div>
       {selectedChannel && (
