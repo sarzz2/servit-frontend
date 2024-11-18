@@ -260,11 +260,11 @@ const ServerDetail: React.FC = () => {
           onCancel={() => setConfirmDialogOpen(false)}
           disable={isConfirmModalButtonDisable}
         />
-        <div className="h-[calc(100%-104px)] overflow-auto scrol">
+        <div className="h-[calc(100%-104px)] overflow-auto">
           {categories.map((category) => (
-            <div key={category.id} className="mb-3 pl-2">
+            <div key={category.id} className="mb-5 mx-2">
               <div
-                className="flex items-center cursor-pointer rounded-md"
+                className="flex cursor-pointer"
                 onClick={() => toggleCategory(category.id)}
               >
                 <svg
@@ -282,6 +282,17 @@ const ServerDetail: React.FC = () => {
                   />
                 </svg>
                 <span className="capitalize">{category.name}</span>
+                {(canManageChannels || canManageServer || owner) && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setNewChannelCategoryId(category.id); // Set category for new channel
+                    }}
+                    className="text-green-500 ml-auto"
+                  >
+                    <i className="fas fa-plus" />
+                  </button>
+                )}
               </div>
               <div
                 className={`overflow-hidden  transition-transform ${expandedCategories.has(category.id) ? 'max-h-screen' : 'max-h-0 '} `}
