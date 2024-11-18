@@ -15,7 +15,11 @@ import { setPermissions } from '../../slices/permissionsSlice';
 import UserBar from '../User/UserBar';
 import eventEmitter from '../../utils/eventEmitter';
 import CreateChannelModal from '../ServerSettings/CreateChannelModal';
-import { CreateChannelProps } from '../../types/createChannelProps';
+
+export interface CreateChannelProps {
+  channelName: string;
+  channelDescription: string;
+}
 
 const ServerDetail: React.FC = () => {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
@@ -32,7 +36,6 @@ const ServerDetail: React.FC = () => {
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [newCategoryNameModal, setNewCategoryNameModal] =
     useState<boolean>(false);
-  const [isChannelModalOpen, setIsChannelModalOpen] = useState<boolean>(false);
   const [isConfirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
   const [isOwnerLeaving, setIsOwnerLeaving] = useState<boolean>(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
@@ -146,12 +149,10 @@ const ServerDetail: React.FC = () => {
       setIsConfirmModalButtonDisable(true);
       await axiosInstance.post(`/servers/leave/${selectedServer.id}`);
       eventEmitter.emit('leaveServer', { serverId: selectedServer.id });
-      setIsConfirmModalButtonDisable(false);
       showSnackbar('Left server successfully', 'success');
       navigate('/home');
     } catch (error) {
       showSnackbar('Error leaving server', 'error');
-      setIsConfirmModalButtonDisable(false);
     } finally {
       setConfirmDialogOpen(false);
       setIsConfirmModalButtonDisable(false);
@@ -183,11 +184,6 @@ const ServerDetail: React.FC = () => {
       } finally {
       }
     }
-  };
-
-  const handleCreateChannel = (categoryId: string) => {
-    setNewChannelCategoryId(categoryId);
-    setIsChannelModalOpen(true);
   };
 
   return (
@@ -266,19 +262,16 @@ const ServerDetail: React.FC = () => {
         />
         <div className="h-[calc(100%-104px)] overflow-auto scrol">
           {categories.map((category) => (
-            <div key={category.id} className="m-1">
+            <div key={category.id} className="mb-3 pl-2">
               <div
-                className="flex items-center justify-between p-2 bg-slate-400 cursor-pointer rounded-md"
+                className="flex items-center cursor-pointer rounded-md"
                 onClick={() => toggleCategory(category.id)}
               >
-                <span className="font-semibold capitalize">
-                  {category.name}
-                </span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  strokeWidth={1.5}
+                  strokeWidth={1.0}
                   stroke="currentColor"
                   className={`w-5 h-5 transition-transform ${expandedCategories.has(category.id) ? 'rotate-180' : 'rotate-90'}`}
                 >
@@ -288,9 +281,10 @@ const ServerDetail: React.FC = () => {
                     d="M6 15l6-6 6 6"
                   />
                 </svg>
+                <span className="capitalize">{category.name}</span>
               </div>
               <div
-                className={`overflow-hidden transition-all duration-500 ease-in-out bg-gray-300 rounded-b-md ${expandedCategories.has(category.id) ? 'max-h-screen pt-4' : 'max-h-0 pt-0'} `}
+                className={`overflow-hidden  transition-transform ${expandedCategories.has(category.id) ? 'max-h-screen' : 'max-h-0 '} `}
               >
                 {channels[category.id]?.map((channel) => (
                   <div
@@ -304,20 +298,11 @@ const ServerDetail: React.FC = () => {
                       };
                       setSelectedChannel(fullChannel);
                     }}
-                    className="pl-6 p-2 text-secondary dark:text-dark-text-secondary cursor-pointer border-b border-gray-300 hover:bg-orange-300  hover:border-transparent transition-transform hover:font-bold capitalize"
+                    className="pl-4 p-2 text-secondary text-sm dark:text-dark-text-secondary cursor-pointer   hover:text-red-100  hover:border-transparent transition-transform capitalize"
                   >
-                    {channel.name}
+                    # {channel.name}
                   </div>
                 ))}
-
-                {(canManageChannels || canManageServer || owner) && (
-                  <div
-                    className="pl-6 p-2 text-secondary bg-gray-300 dark:text-dark-text-secondary cursor-pointer border-b border-gray-300 hover:bg-orange-300 hover:border-transparent transition-transform hover:font-bold "
-                    onClick={() => handleCreateChannel(category.id)}
-                  >
-                    + Create Channel
-                  </div>
-                )}
               </div>
             </div>
           ))}

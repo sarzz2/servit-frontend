@@ -74,11 +74,11 @@ const Friends: React.FC<FriendsProps> = ({ friends, fetchFriends }) => {
       setOpenOptions(null);
       fetchFriends(view);
       showSnackbar('Friend removed Succesfully!', 'success');
-      setIsConfirmModalButtonDisable(false);
     } catch (error) {
       showSnackbar('An error occurred. Please try again.', 'error');
-      setIsConfirmModalButtonDisable(false);
       console.error('Error removing friend:', error);
+    } finally {
+      setIsConfirmModalButtonDisable(false);
     }
   };
 

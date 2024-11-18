@@ -127,7 +127,7 @@ const CreateServerModal: React.FC<CreateServerModalProps> = ({
         <div className="mb-6">
           <label
             htmlFor="serverName"
-            className="block text-sm font-medium text-primary dark:text-dark-text-primary mb-2 "
+            className="block text-sm font-medium text-primary dark:text-dark-text-primary mb-2"
           >
             Server Name
           </label>

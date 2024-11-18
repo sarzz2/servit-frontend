@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import axiosInstance from '../../utils/axiosInstance';
-import { Server } from '../../types/server';
-import { CreateChannelProps } from '../../types/createChannelProps';
+
+interface CreateChannelProps {
+  channelName: string;
+  channelDescription: string;
+}
 
 interface CreateChannelModalProps {
   newChannelCategoryId: string | null;
@@ -76,6 +78,3 @@ const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
 };
 
 export default CreateChannelModal;
-function showSnackbar(arg0: string, arg1: string) {
-  throw new Error('Function not implemented.');
-}

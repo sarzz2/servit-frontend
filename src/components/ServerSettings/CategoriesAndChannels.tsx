@@ -6,11 +6,14 @@ import CreateCategoryModal from './CreateCategoryModal';
 import { Channel } from '../../types/channel';
 import { Category } from '../../types/category';
 import { Server } from '../../types/server';
-import { CreateChannelProps } from '../../types/createChannelProps';
 import ConfirmationDialog from '../Common/ConfirmationDialog';
 
 interface CategoriesAndChannelsProps {
   server: Server;
+}
+interface CreateChannelProps {
+  channelName: string;
+  channelDescription: string;
 }
 
 const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
