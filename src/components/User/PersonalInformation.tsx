@@ -86,7 +86,7 @@ const PersonalInformation: React.FC = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // setServerPictureFile(file); // Store the file temporarily without uploading
+      setProfilePictureFile(file); // Store the file temporarily without uploading
 
       const reader = new FileReader();
       reader.onloadend = () => {
