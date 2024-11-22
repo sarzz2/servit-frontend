@@ -26,7 +26,6 @@ const Header: React.FC = () => {
   const location = useLocation();
   const hideButtonRoutes = ['/login', '/login/:sudo'];
   const hideButton = hideButtonRoutes.includes(location.pathname);
-  console.log(hideButton, 'route');
 
   const toggleDropdown = () => {
     if (isDropdownOpen) {

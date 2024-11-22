@@ -69,7 +69,7 @@ const SecuritySettings: React.FC = () => {
         });
       })
       .catch((error) => {
-        // showSnackbar(error.response.data.detail, 'error');
+        showSnackbar(error.response.data.detail, 'error');
         console.error('Error updating user information', error);
       });
     // Handle password change logic here

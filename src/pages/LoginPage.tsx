@@ -8,7 +8,6 @@ const LoginPage: React.FC = () => {
 
   if (sudo === 'true') {
     isSudoAccess = true;
-    console.log(isSudoAccess, sudo);
   }
 
   return (

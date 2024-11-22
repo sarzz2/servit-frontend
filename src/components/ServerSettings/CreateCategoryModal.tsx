@@ -21,7 +21,6 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
-    console.log(categoryName);
     if (categoryName) {
       setIsButtonDisabled(false);
     } else {

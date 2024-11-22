@@ -24,7 +24,6 @@ const loginSchema = yup.object().shape({
 const Login: React.FC<{
   sudo: boolean;
 }> = ({ sudo }) => {
-  console.log(sudo);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();

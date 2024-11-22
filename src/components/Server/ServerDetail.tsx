@@ -181,7 +181,6 @@ const ServerDetail: React.FC = () => {
       } catch (error: any) {
         console.error('Error creating channel:', error);
         showSnackbar(error.response.data.detail[0].msg, 'error');
-      } finally {
       }
     }
   };

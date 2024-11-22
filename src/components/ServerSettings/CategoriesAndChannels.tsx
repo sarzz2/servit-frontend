@@ -136,7 +136,6 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
       } catch (error: any) {
         console.error('Error creating channel:', error);
         showSnackbar(error.response.data.detail[0].msg, 'error');
-      } finally {
       }
     }
   };
