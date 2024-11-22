@@ -17,8 +17,8 @@ const loginSchema = yup.object().shape({
   username: yup.string().required('Username is required'),
   password: yup
     .string()
-    .min(6, 'Password must be at least 6 characters')
-    .required('Password is required'),
+    .required('Password is required')
+    .min(6, 'Password must be at least 6 characters'),
 });
 
 const Login: React.FC<{
@@ -45,10 +45,10 @@ const Login: React.FC<{
         navigate('/profile/security');
       } else {
         const response = await axiosInstance.post(`/users/login`, data);
-        const token = response.data.access_token;
 
         // Store token in localStorage
-        localStorage.setItem('access_token', token);
+        localStorage.setItem('access_token', response.data.access_token);
+        localStorage.setItem('refresh_token', response.data.refresh_token);
         showSnackbar('Login successful!', 'success');
         dispatch(
           setUser({
@@ -84,10 +84,12 @@ const Login: React.FC<{
             <label
               className="block text-sm font-medium"
               style={{ color: 'var(--text-primary)' }}
+              htmlFor="username"
             >
               Username
             </label>
             <input
+              id="username"
               type="text"
               className={`w-full p-2 border rounded ${
                 errors.username ? 'border-red-500' : 'border-gray-300'
@@ -103,10 +105,12 @@ const Login: React.FC<{
             <label
               className="block text-sm font-medium"
               style={{ color: 'var(--text-primary)' }}
+              htmlFor="password"
             >
               Password
             </label>
             <input
+              id="password"
               type="password"
               className={`w-full p-2 border rounded ${
                 errors.password ? 'border-red-500' : 'border-gray-300'
