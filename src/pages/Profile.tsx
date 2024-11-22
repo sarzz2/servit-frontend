@@ -7,10 +7,12 @@ const Profile: React.FC = () => {
   const [activeSection, setActiveSection] = useState('personal-info');
   const { service } = useParams<{ service: string }>();
   const navigate = useNavigate();
+
   useEffect(() => {
     if (service !== undefined) {
       setActiveSection(service);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const renderActiveSection = () => {

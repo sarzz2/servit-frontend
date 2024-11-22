@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
-import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../Snackbar';
 
@@ -80,6 +79,7 @@ const SecuritySettings: React.FC = () => {
     if (localStorage.getItem('sudo_token') == null) {
       navigate('/login/true');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
