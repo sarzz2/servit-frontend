@@ -21,7 +21,10 @@ const loginSchema = yup.object().shape({
     .required('Password is required'),
 });
 
-const Login: React.FC = () => {
+const Login: React.FC<{
+  sudo: boolean;
+}> = ({ sudo }) => {
+  console.log(sudo);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
@@ -34,22 +37,31 @@ const Login: React.FC = () => {
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      const response = await axiosInstance.post('/users/login', data);
-      const token = response.data.access_token;
+      if (sudo) {
+        const response = await axiosInstance.post(`/users/token/sudo`, data);
+        const token = response.data.sudo_token;
 
-      // Store token in localStorage
-      localStorage.setItem('access_token', token);
-      showSnackbar('Login successful!', 'success');
-      dispatch(
-        setUser({
-          email: response.data.email,
-          username: response.data.username,
-          id: response.data.id,
-          profilePicture: response.data.profile_picture_url,
-        })
-      );
-      dispatch(closeModal());
-      navigate('/home');
+        // Store token in localStorage
+        localStorage.setItem('sudo_token', token);
+        navigate('/profile/security');
+      } else {
+        const response = await axiosInstance.post(`/users/login`, data);
+        const token = response.data.access_token;
+
+        // Store token in localStorage
+        localStorage.setItem('access_token', token);
+        showSnackbar('Login successful!', 'success');
+        dispatch(
+          setUser({
+            email: response.data.email,
+            username: response.data.username,
+            id: response.data.id,
+            profilePicture: response.data.profile_picture_url,
+          })
+        );
+        dispatch(closeModal());
+        navigate('/home');
+      }
     } catch (error: any) {
       if (error.response.status === 401) {
         showSnackbar('Invalid username or password.', 'error');

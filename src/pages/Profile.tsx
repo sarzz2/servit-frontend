@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import PersonalInformation from '../components/User/PersonalInformation';
 import SecuritySettings from '../components/User/SecuritySettings';
 
 const Profile: React.FC = () => {
   const [activeSection, setActiveSection] = useState('personal-info');
+  const { service } = useParams<{ service: string }>();
   const navigate = useNavigate();
+  useEffect(() => {
+    if (service !== undefined) {
+      setActiveSection(service);
+    }
+  }, []);
 
   const renderActiveSection = () => {
     switch (activeSection) {

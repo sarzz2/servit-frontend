@@ -14,12 +14,19 @@ const PersonalInformation: React.FC = () => {
     () => ({
       username: user?.username || '',
       email: user?.email || '',
+      profilePicture: user?.profilePicture || '',
     }),
     [user]
   );
 
   const [formData, setFormData] = useState(initialFormData);
-  const [isChanged, setIsChanged] = useState(false);
+  const [isChanged, setIsChanged] = useState<boolean>(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    user?.profilePicture ? user?.profilePicture : null
+  );
+  const [profilePictureFile, setProfilePictureFile] = useState<File | null>(
+    null
+  );
 
   useEffect(() => {
     setFormData(initialFormData);
@@ -27,10 +34,13 @@ const PersonalInformation: React.FC = () => {
 
   useEffect(() => {
     setIsChanged(
-      formData.username !== initialFormData.username ||
-        formData.email !== initialFormData.email
+      (formData.username !== '' &&
+        formData.email !== '' &&
+        (formData.username !== initialFormData.username ||
+          formData.email !== initialFormData.email)) ||
+        imagePreview !== null
     );
-  }, [formData, initialFormData]);
+  }, [formData, initialFormData, imagePreview]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -47,6 +57,7 @@ const PersonalInformation: React.FC = () => {
         {
           username: formData.username,
           email: formData.email,
+          profilePicture: profilePictureFile,
         },
         {
           headers: {
@@ -72,37 +83,78 @@ const PersonalInformation: React.FC = () => {
       });
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // setServerPictureFile(file); // Store the file temporarily without uploading
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string); // Set preview URL
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label
-          className="block text-sm font-medium"
-          style={{ color: 'var(--text-primary)' }}
-        >
-          Username
-        </label>
-        <input
-          type="text"
-          name="username"
-          value={formData.username}
-          onChange={handleChange}
-          className="w-full p-2 bg-bg-secondary dark:bg-dark-secondary outline-none rounded"
-        />
-      </div>
-      <div>
-        <label
-          className="block text-sm font-medium"
-          style={{ color: 'var(--text-primary)' }}
-        >
-          Email
-        </label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full p-2 bg-bg-secondary dark:bg-dark-secondary outline-none rounded"
-        />
+      <div className="flex gap-6">
+        <div>
+          <div className="relative">
+            <div className="w-32 h-32 rounded-full overflow-hidden shadow-lg">
+              <img
+                src={imagePreview ? imagePreview : '/Images/avtar.svg'}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+              <label
+                className="absolute bottom-0 right-3 bg-green-600 px-2 pt-2 pb-1 rounded-full cursor-pointer"
+                htmlFor="profile"
+              >
+                <i className="fas fa-camera text-xl" />
+              </label>
+              <input
+                type="file"
+                id="profile"
+                className="hidden"
+                onChange={(e) => handleImageUpload(e)}
+                name="profilePicture"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex-grow">
+          <div className="mb-4">
+            <label
+              className="block text-sm font-medium"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Username
+            </label>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              className="w-full p-2 bg-bg-secondary dark:bg-dark-secondary outline-none rounded"
+            />
+          </div>
+          <div>
+            <label
+              className="block text-sm font-medium"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full p-2 bg-bg-secondary dark:bg-dark-secondary outline-none rounded"
+            />
+          </div>
+        </div>
       </div>
       <button
         type="submit"

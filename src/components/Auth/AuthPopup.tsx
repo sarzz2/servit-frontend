@@ -38,7 +38,7 @@ const AuthPopup: React.FC = () => {
             <i className="fas fa-times" />
           </button>
         </div>
-        {isLogin ? <Login /> : <Register />}
+        {isLogin ? <Login sudo={false} /> : <Register />}
       </div>
     </div>
   );
