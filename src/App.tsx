@@ -164,10 +164,20 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/login/:sudo" element={<LoginPage />} />
 
             {/* Routes that require authentication */}
             <Route
               path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/profile/:service"
               element={
                 <ProtectedRoute>
                   <Profile />

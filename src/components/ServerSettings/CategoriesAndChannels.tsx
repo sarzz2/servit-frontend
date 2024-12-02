@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { useSnackbar } from '../Snackbar';
-import CreateChannelModal from '../Common/CreateChannelModal';
+import CreateChannelModal from './CreateChannelModal';
 import CreateCategoryModal from './CreateCategoryModal';
 import { Channel } from '../../types/channel';
 import { Category } from '../../types/category';
 import { Server } from '../../types/server';
+import ConfirmationDialog from '../Common/ConfirmationDialog';
 
 interface CategoriesAndChannelsProps {
   server: Server;
+}
+interface CreateChannelProps {
+  channelName: string;
+  channelDescription: string;
 }
 
 const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
@@ -21,19 +26,23 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
   );
   const [editedCategoryName, setEditedCategoryName] = useState<string>('');
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
-  const [newChannelName, setNewChannelName] = useState<string>('');
   const [editingChannelId, setEditingChannelId] = useState<string | null>(null);
   const [editedChannelDescription, setEditedChannelDescription] =
     useState<string>('');
   const [editedChannelName, setEditedChannelName] = useState<string>('');
   const [newCategoryNameModal, setNewCategoryNameModal] =
     useState<boolean>(false);
-  const [newChannelDescription, setNewChannelDescription] =
-    useState<string>('');
   const [newChannelCategoryId, setNewChannelCategoryId] = useState<
     string | null
   >(null);
   const [channels, setChannels] = useState<{ [key: string]: Channel[] }>({});
+  const [isconfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
+  const [categoryId, setCategoryId] = useState<string>('');
+  const [channelId, setChannelId] = useState<string>('');
+  const [type, setType] = useState<string>('');
+  const [confirmMessage, setConfirmMessage] = useState<React.ReactNode>(null);
+  const [isConfirmModalButtonDisable, setIsConfirmModalButtonDisable] =
+    useState<boolean>(false);
   const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -94,22 +103,25 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
 
   const handleDeleteCategory = async (categoryId: string) => {
     try {
+      setIsConfirmModalButtonDisable(true);
       await axiosInstance.delete(`/category/${server.id}/${categoryId}`);
       showSnackbar('Category deleted successfully!', 'success');
       setCategories(categories.filter((cat) => cat.id !== categoryId));
     } catch (error) {
       showSnackbar('Error deleting category!', 'error');
+    } finally {
+      setIsConfirmModalButtonDisable(false);
     }
   };
 
-  const handleCreateChannel = async () => {
-    if (newChannelName && newChannelCategoryId) {
+  const handleCreateChannel = async (categoryData: CreateChannelProps) => {
+    if (newChannelCategoryId) {
       try {
         const response = await axiosInstance.post(
           `/channels/${server.id}/${newChannelCategoryId}`,
           {
-            name: newChannelName,
-            description: newChannelDescription,
+            name: categoryData.channelName,
+            description: categoryData.channelDescription,
           }
         );
         showSnackbar('Channel created successfully!', 'success');
@@ -120,8 +132,6 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
             response.data.channel,
           ],
         }));
-        setNewChannelName('');
-        setNewChannelDescription('');
         setNewChannelCategoryId(null);
       } catch (error: any) {
         console.error('Error creating channel:', error);
@@ -161,7 +171,9 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
 
   const handleDeleteChannel = async (categoryId: string, channelId: string) => {
     try {
+      setIsConfirmModalButtonDisable(true);
       await axiosInstance.delete(`/channels/${server.id}/${channelId}`);
+
       // Update the channels state
       setChannels((prevChannels) => ({
         ...prevChannels,
@@ -171,7 +183,59 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
       }));
     } catch (error) {
       console.error('Error deleting channel:', error);
+    } finally {
+      setIsConfirmModalButtonDisable(false);
     }
+  };
+
+  const toggleConfirmationDialog = (
+    type: string,
+    categoryId: string,
+    categoryName: string,
+    channelId: string = '',
+    channelName: string = ''
+  ) => {
+    setType(type);
+    setIsConfirmModalOpen(true);
+    setCategoryId(categoryId);
+    if (type === 'channel') {
+      setChannelId(channelId);
+    }
+    setConfirmMessage(
+      <>
+        Are you sure, you want to{' '}
+        <strong className="text-red-600">Delete</strong>
+        {' the '}
+        {type === 'channel' ? (
+          <>
+            channel <strong>{channelName}</strong>
+          </>
+        ) : (
+          <>
+            category <strong>{categoryName}</strong>
+          </>
+        )}
+        ?
+      </>
+    );
+  };
+
+  const confirmConfirmationModal = async (type: string) => {
+    if (type === 'channel') {
+      await handleDeleteChannel(categoryId, channelId);
+    } else {
+      await handleDeleteCategory(categoryId);
+    }
+    setDefaultValues(type);
+  };
+  const setDefaultValues = (type: string) => {
+    if (type === 'channel') {
+      setChannelId('');
+    }
+    setIsConfirmModalOpen(false);
+    setCategoryId('');
+    setConfirmMessage('');
+    setType('');
   };
 
   if (loading) {
@@ -273,7 +337,14 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
                         <i className="fas fa-edit" />
                       </button>
                       <button
-                        onClick={() => handleDeleteCategory(category.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleConfirmationDialog(
+                            'category',
+                            category.id,
+                            category.name
+                          );
+                        }}
                         className="text-red-500 mx-2"
                       >
                         <i className="fas fa-trash" />
@@ -379,7 +450,13 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
                               </button>
                               <button
                                 onClick={() =>
-                                  handleDeleteChannel(category.id, channel.id)
+                                  toggleConfirmationDialog(
+                                    'channel',
+                                    category.id,
+                                    category.name,
+                                    channel.id,
+                                    channel.name
+                                  )
                                 }
                                 className="text-red-500 mx-2"
                               >
@@ -403,12 +480,17 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
       {/* Modal for creating new channel */}
       <CreateChannelModal
         newChannelCategoryId={newChannelCategoryId}
-        newChannelName={newChannelName}
-        setNewChannelName={setNewChannelName}
-        newChannelDescription={newChannelDescription}
-        setNewChannelDescription={setNewChannelDescription}
         handleCreateChannel={handleCreateChannel}
         setNewChannelCategoryId={setNewChannelCategoryId}
+      />
+      {/* Modal for deleteing channels */}
+
+      <ConfirmationDialog
+        isOpen={isconfirmModalOpen}
+        message={confirmMessage}
+        onConfirm={async () => await confirmConfirmationModal(type)}
+        onCancel={() => setDefaultValues(type)}
+        disable={isConfirmModalButtonDisable}
       />
     </div>
   );

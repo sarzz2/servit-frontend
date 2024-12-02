@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 import { Sun, Moon } from 'lucide-react';
@@ -22,6 +22,10 @@ const Header: React.FC = () => {
   const handleLogout = () => {
     dispatch(logout());
   };
+
+  const location = useLocation();
+  const hideButtonRoutes = ['/login', '/login/:sudo'];
+  const hideButton = hideButtonRoutes.includes(location.pathname);
 
   const toggleDropdown = () => {
     if (isDropdownOpen) {
@@ -170,13 +174,15 @@ const Header: React.FC = () => {
             </div>
           ) : (
             <div>
-              <button
-                className="px-4 py-2 text-sm font-medium hover:bg-opacity-10 hover:bg-accent-color rounded-md transition-colors"
-                style={{ color: 'var(--text-primary)' }}
-                onClick={() => dispatch(openModal('login'))}
-              >
-                Log In
-              </button>
+              {hideButton === false && (
+                <button
+                  className="px-4 py-2 text-sm font-medium hover:bg-opacity-10 hover:bg-accent-color rounded-md transition-colors mr-4"
+                  style={{ color: 'var(--text-primary)' }}
+                  onClick={() => dispatch(openModal('login'))}
+                >
+                  Log In
+                </button>
+              )}
               <button
                 className="px-4 py-2 text-sm font-medium text-white bg-accent-color hover:bg-opacity-90 rounded-md transition-colors"
                 onClick={() => dispatch(openModal('signup'))}

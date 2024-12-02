@@ -14,6 +14,12 @@ import { fetchPermissions } from '../../utils/fetchPermissions';
 import { setPermissions } from '../../slices/permissionsSlice';
 import UserBar from '../User/UserBar';
 import eventEmitter from '../../utils/eventEmitter';
+import CreateChannelModal from '../ServerSettings/CreateChannelModal';
+
+export interface CreateChannelProps {
+  channelName: string;
+  channelDescription: string;
+}
 
 const ServerDetail: React.FC = () => {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
@@ -35,6 +41,11 @@ const ServerDetail: React.FC = () => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set()
   );
+  const [isConfirmModalButtonDisable, setIsConfirmModalButtonDisable] =
+    useState<boolean>(false);
+  const [newChannelCategoryId, setNewChannelCategoryId] = useState<
+    string | null
+  >('');
   const { permissions } = useSelector((state: RootState) => state.permissions);
 
   const selectedServer = useSelector(
@@ -135,6 +146,7 @@ const ServerDetail: React.FC = () => {
 
   const confirmLeaveServer = async () => {
     try {
+      setIsConfirmModalButtonDisable(true);
       await axiosInstance.post(`/servers/leave/${selectedServer.id}`);
       eventEmitter.emit('leaveServer', { serverId: selectedServer.id });
       showSnackbar('Left server successfully', 'success');
@@ -143,6 +155,33 @@ const ServerDetail: React.FC = () => {
       showSnackbar('Error leaving server', 'error');
     } finally {
       setConfirmDialogOpen(false);
+      setIsConfirmModalButtonDisable(false);
+    }
+  };
+
+  const createChannel = async (channelData: CreateChannelProps) => {
+    if (newChannelCategoryId) {
+      try {
+        const response = await axiosInstance.post(
+          `/channels/${serverId}/${newChannelCategoryId}`,
+          {
+            name: channelData.channelName,
+            description: channelData.channelDescription,
+          }
+        );
+        showSnackbar('Channel created successfully!', 'success');
+        setChannels((prevChannels) => ({
+          ...prevChannels,
+          [newChannelCategoryId]: [
+            ...(prevChannels[newChannelCategoryId] || []),
+            response.data.channel,
+          ],
+        }));
+        setNewChannelCategoryId(null);
+      } catch (error: any) {
+        console.error('Error creating channel:', error);
+        showSnackbar(error.response.data.detail[0].msg, 'error');
+      }
     }
   };
 
@@ -218,50 +257,66 @@ const ServerDetail: React.FC = () => {
           }
           onConfirm={confirmLeaveServer}
           onCancel={() => setConfirmDialogOpen(false)}
+          disable={isConfirmModalButtonDisable}
         />
-
-        {categories.map((category) => (
-          <div key={category.id} className="mb-4">
-            <div
-              className="flex items-center justify-between px-4 cursor-pointer"
-              onClick={() => toggleCategory(category.id)}
-            >
-              <span className="font-semibold">{category.name}</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className={`w-5 h-5 transition-transform ${expandedCategories.has(category.id) ? 'rotate-180' : 'rotate-90'}`}
+        <div className="h-[calc(100%-104px)] overflow-auto">
+          {categories.map((category) => (
+            <div key={category.id} className="mb-5 mx-2">
+              <div
+                className="flex cursor-pointer"
+                onClick={() => toggleCategory(category.id)}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 15l6-6 6 6"
-                />
-              </svg>
-            </div>
-            {expandedCategories.has(category.id) &&
-              channels[category.id]?.map((channel) => (
-                <div
-                  key={channel.id}
-                  onClick={() => {
-                    const fullChannel = {
-                      ...channel,
-                      description: channel.description,
-                      members: [], // Add default or fetched members
-                      createdAt: new Date().toISOString(), // Add default or fetched createdAt
-                    };
-                    setSelectedChannel(fullChannel);
-                  }}
-                  className="ml-6 mt-2 text-secondary dark:text-dark-text-secondary cursor-pointer"
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.0}
+                  stroke="currentColor"
+                  className={`w-5 h-5 transition-transform ${expandedCategories.has(category.id) ? 'rotate-180' : 'rotate-90'}`}
                 >
-                  {channel.name}
-                </div>
-              ))}
-          </div>
-        ))}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 15l6-6 6 6"
+                  />
+                </svg>
+                <span className="capitalize">{category.name}</span>
+                {(canManageChannels || canManageServer || owner) && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setNewChannelCategoryId(category.id); // Set category for new channel
+                    }}
+                    className="text-green-500 ml-auto"
+                  >
+                    <i className="fas fa-plus" />
+                  </button>
+                )}
+              </div>
+              <div
+                className={`overflow-hidden  transition-transform ${expandedCategories.has(category.id) ? 'max-h-screen' : 'max-h-0 '} `}
+              >
+                {channels[category.id]?.map((channel) => (
+                  <div
+                    key={channel.id}
+                    onClick={() => {
+                      const fullChannel = {
+                        ...channel,
+                        description: channel.description,
+                        members: [], // Add default or fetched members
+                        createdAt: new Date().toISOString(), // Add default or fetched createdAt
+                      };
+                      setSelectedChannel(fullChannel);
+                    }}
+                    className="pl-4 p-2 text-secondary text-sm dark:text-dark-text-secondary cursor-pointer   hover:text-red-100  hover:border-transparent transition-transform capitalize"
+                  >
+                    # {channel.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
         <UserBar />
       </div>
       {selectedChannel && (
@@ -269,6 +324,13 @@ const ServerDetail: React.FC = () => {
           <ChannelChat channel={selectedChannel} />
         </div>
       )}
+      {
+        <CreateChannelModal
+          newChannelCategoryId={newChannelCategoryId}
+          handleCreateChannel={createChannel}
+          setNewChannelCategoryId={setNewChannelCategoryId}
+        />
+      }
     </div>
   );
 };
