@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { useSnackbar } from '../Snackbar';
 
@@ -17,10 +17,20 @@ const CreateServerModal: React.FC<CreateServerModalProps> = ({
   const [serverPictureUrl, setServerPictureUrl] = useState<string | null>(null);
   const [serverPictureFile, setServerPictureFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
   const { showSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    if (serverName) {
+      setIsButtonDisabled(false);
+    } else {
+      setIsButtonDisabled(true);
+    }
+  }, [serverName]);
 
   const handleCreateServer = async () => {
     try {
+      setIsButtonDisabled(true);
       let uploadedImageUrl = serverPictureUrl;
 
       // If there’s a selected image but it hasn’t been uploaded, upload it now
@@ -46,6 +56,8 @@ const CreateServerModal: React.FC<CreateServerModalProps> = ({
       showSnackbar('Server created successfully!', 'success');
     } catch (error: any) {
       showSnackbar(error.response?.data?.detail[0]?.msg, 'error');
+    } finally {
+      setIsButtonDisabled(false);
     }
   };
 
@@ -149,7 +161,8 @@ const CreateServerModal: React.FC<CreateServerModalProps> = ({
           </button>
           <button
             onClick={handleCreateServer}
-            className="px-6 py-2 rounded-lg bg-button-primary text-white hover:bg-button-hover"
+            className="px-6 py-2 rounded-lg bg-button-primary text-white hover:bg-button-hover disabled:bg-gray-400 disabled:cursor-not-allowed"
+            disabled={isButtonDisabled}
           >
             Create
           </button>
