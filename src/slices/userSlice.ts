@@ -39,6 +39,8 @@ const userSlice = createSlice({
       state.isAuthLoading = false;
       state.user = null;
       localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('sudo_token');
     },
     startLoading(state) {
       state.isAuthLoading = true;

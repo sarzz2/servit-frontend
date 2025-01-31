@@ -37,7 +37,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-10 z-50">
       <div className="bg-bg-primary dark:bg-dark-primary p-6 rounded-lg shadow-lg w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Create Category</h2>
@@ -45,7 +45,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
             onClick={onClose}
             className="text-gray-500 dark:text-white hover:text-gray-900 dark:hover:text-gray-400"
           >
-            &times;
+            <i className="fas fa-times"></i>
           </button>
         </div>
         <div className="mb-4">

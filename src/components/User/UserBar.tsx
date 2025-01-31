@@ -1,13 +1,15 @@
 import { RootState } from '../../Store';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { logout } from '../../slices/userSlice';
 
 const UserBar: React.FC = () => {
   const user = useSelector((state: RootState) => state.user.user);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const togglePopup = () => {
     setIsPopupOpen(!isPopupOpen);
@@ -17,6 +19,10 @@ const UserBar: React.FC = () => {
     if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
       setIsPopupOpen(false);
     }
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
   };
 
   useEffect(() => {
@@ -66,7 +72,10 @@ const UserBar: React.FC = () => {
                 User Profile
               </li>
               <li className="p-3 cursor-pointer hover:bg-hover-bg">Settings</li>
-              <li className="p-3 cursor-pointer text-red-600 hover:bg-hover-bg">
+              <li
+                className="p-3 cursor-pointer text-red-600 hover:bg-hover-bg"
+                onClick={handleLogout}
+              >
                 Logout
               </li>
             </ul>

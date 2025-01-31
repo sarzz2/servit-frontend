@@ -48,7 +48,7 @@ describe('Login Component', () => {
   test('renders login form', () => {
     render(
       <Provider store={store}>
-        <Login />
+        <Login sudo={false} />
       </Provider>
     );
 
@@ -70,7 +70,7 @@ describe('Login Component', () => {
 
     render(
       <Provider store={store}>
-        <Login />
+        <Login sudo={false} />
       </Provider>
     );
 
@@ -107,7 +107,7 @@ describe('Login Component', () => {
 
     render(
       <Provider store={store}>
-        <Login />
+        <Login sudo={false} />
       </Provider>
     );
 
@@ -133,7 +133,7 @@ describe('Login Component', () => {
 
     render(
       <Provider store={store}>
-        <Login />
+        <Login sudo={false} />
       </Provider>
     );
 
@@ -157,7 +157,7 @@ describe('Login Component', () => {
   test('displays validation error messages', async () => {
     render(
       <Provider store={store}>
-        <Login />
+        <Login sudo={false} />
       </Provider>
     );
 
@@ -172,7 +172,7 @@ describe('Login Component', () => {
   test('displays validation error messages for password length', async () => {
     render(
       <Provider store={store}>
-        <Login />
+        <Login sudo={false} />
       </Provider>
     );
 
@@ -198,7 +198,7 @@ describe('Login Component', () => {
 
     render(
       <Provider store={store}>
-        <Login />
+        <Login sudo={false} />
       </Provider>
     );
 
