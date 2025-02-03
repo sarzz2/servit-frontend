@@ -3,7 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+// import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
 import { store } from './Store';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -17,4 +17,4 @@ root.render(
   </Provider>
 );
 
-reportWebVitals(console.log);
+// reportWebVitals(console.log);
