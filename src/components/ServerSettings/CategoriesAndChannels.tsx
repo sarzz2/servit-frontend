@@ -406,7 +406,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
                                 onClick={() =>
                                   editChannel(category.id, channel.id)
                                 }
-                                className={`mx-2 ${editedCategoryName === category.name || editedCategoryName.trim() === '' ? 'text-gray-500' : 'text-green-500'}`}
+                                className={`mx-2 ${editedChannelName !== channel.name || editedChannelDescription !== channel.description ? 'text-green-500' : 'text-gray-500'}`}
                                 disabled={
                                   (editedChannelName === channel.name &&
                                     editedChannelDescription ===

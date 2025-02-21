@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import Overview from './Overview';
 import CategoriesAndChannels from './CategoriesAndChannels';
+import Roles from './Roles';
 
 const ServerSettings: React.FC = () => {
   const { serverId } = useParams<{ serverId: string }>();
@@ -28,6 +29,8 @@ const ServerSettings: React.FC = () => {
         return <Overview server={server} setServer={setServer} />;
       case 'categories':
         return <CategoriesAndChannels server={server} />;
+      case 'roles':
+        return <Roles server={server} roleName={''} roleDescription={''} />;
       default:
         return <Overview server={server} setServer={setServer} />;
     }
@@ -57,6 +60,16 @@ const ServerSettings: React.FC = () => {
             onClick={() => setSelectedSetting('categories')}
           >
             Categories and Channels
+          </li>
+          <li
+            className={`py-2 px-4 hover:bg-hover-bg dark:hover:bg-dark-hover cursor-pointer rounded-lg mb-2 ${
+              selectedSetting === 'roles'
+                ? 'bg-hover-bg dark:bg-dark-hover'
+                : ''
+            }`}
+            onClick={() => setSelectedSetting('roles')}
+          >
+            Roles
           </li>
         </ul>
       </aside>

@@ -61,7 +61,7 @@ const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
             <div className="flex justify-end">
               <button
                 onClick={() => handleCreate()}
-                className="bg-button-primary  hover:bg-button-hover px-4 py-2 rounded disabled:bg-gray-500 disabled:cursor-not-allowed"
+                className="bg-button-primary  hover:bg-button-hover text-white px-4 py-2 rounded disabled:bg-gray-500 disabled:cursor-not-allowed"
                 disabled={isCreateButtonDisable}
               >
                 Create

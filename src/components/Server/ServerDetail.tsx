@@ -210,26 +210,33 @@ const ServerDetail: React.FC = () => {
         </div>
 
         {isDropdownOpen && (
-          <div className="absolute z-30 left-1/6 transform -translate-x-1/6 w-60 bg-bg-secondary rounded-lg shadow-lg ml-2">
+          <div className="absolute py-1 z-30 left-1/6 transform -translate-x-1/6 w-60 bg-bg-secondary rounded-lg shadow-lg ml-2">
             {owner && (
               <div
-                className="px-4 py-2 hover:bg-hover-bg cursor-pointer"
-                onClick={() => navigate(`/settings/${selectedServer.id}`)}
+                className="px-4 py-2 rounded-lg hover:bg-hover-bg cursor-pointer"
+                onClick={() => {
+                  setDropdownOpen(!isDropdownOpen);
+                  navigate(`/settings/${selectedServer.id}`);
+                }}
               >
                 Server Settings
               </div>
             )}
             {(canManageChannels || canManageServer || owner) && (
               <div
-                className="px-4 py-2 hover:bg-hover-bg cursor-pointer"
-                onClick={() => setNewCategoryNameModal(true)}
+                className="px-4 py-2 rounded-lg hover:bg-hover-bg cursor-pointer"
+                onClick={() => {
+                  setDropdownOpen(!isDropdownOpen);
+                  setNewCategoryNameModal(true);
+                }}
               >
                 Create Category
               </div>
             )}
             <div
-              className="px-4 py-2 text-red-500 hover:bg-hover-bg cursor-pointer"
+              className="px-4 py-2 rounded-lg text-red-500 hover:bg-hover-bg cursor-pointer"
               onClick={() => {
+                setDropdownOpen(!isDropdownOpen);
                 setIsOwnerLeaving(owner);
                 setConfirmDialogOpen(true);
               }}

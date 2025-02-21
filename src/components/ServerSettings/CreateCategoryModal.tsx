@@ -76,7 +76,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
           </button>
           <button
             onClick={handleSubmit}
-            className="bg-button-primary hover:bg-button-hover px-4 py-2 rounded-lg disabled:bg-gray-500 disabled:cursor-not-allowed"
+            className="bg-button-primary text-white hover:bg-button-hover px-4 py-2 rounded-lg disabled:bg-gray-500 disabled:cursor-not-allowed"
             disabled={isButtonDisabled}
           >
             Create Category

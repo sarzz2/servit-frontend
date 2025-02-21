@@ -22,7 +22,7 @@ const SaveCancelButtons: React.FC<SaveCancelButtonsProps> = ({
         Cancel
       </button>
       <button
-        className="bg-button-primary px-4 py-2 rounded-lg"
+        className="bg-button-primary px-4 py-2 rounded-lg text-white"
         onClick={onSave}
       >
         Save Changes
