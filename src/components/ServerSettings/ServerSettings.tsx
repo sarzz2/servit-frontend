@@ -30,7 +30,7 @@ const ServerSettings: React.FC = () => {
       case 'categories':
         return <CategoriesAndChannels server={server} />;
       case 'roles':
-        return <Roles server={server} roleName={''} roleDescription={''} />;
+        return <Roles server={server} />;
       default:
         return <Overview server={server} setServer={setServer} />;
     }

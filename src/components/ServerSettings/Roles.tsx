@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { useSnackbar } from '../Snackbar';
-import CreateChannelModal from './CreateChannelModal';
-import CreateCategoryModal from './CreateCategoryModal';
-import { Channel } from '../../types/channel';
-import { Category } from '../../types/category';
 import { Server } from '../../types/server';
 import ConfirmationDialog from '../Common/ConfirmationDialog';
 import CreateRoleModal from './CreateRoleModal';
@@ -13,10 +9,6 @@ import { Role } from '../../types/role';
 interface RolesProps {
   server: Server;
 }
-interface RolesProps {
-  roleName: string;
-  roleDescription: string;
-}
 
 const Roles: React.FC<RolesProps> = ({ server }) => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -24,12 +16,14 @@ const Roles: React.FC<RolesProps> = ({ server }) => {
   const [editedRoleDescription, setEditedRoleDescription] =
     useState<string>('');
   const [editedRoleName, setEditedRoleName] = useState<string>('');
-  const [newRoleNameModal, setNewRoleNameModal] = useState<boolean>(false);
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState<boolean>(false);
   const [roles, setRoles] = useState<Role[]>([]);
   const [isconfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
   const [roleId, setRoleId] = useState<string>('');
   const [confirmMessage, setConfirmMessage] = useState<React.ReactNode>(null);
   const [isConfirmModalButtonDisable, setIsConfirmModalButtonDisable] =
+    useState<boolean>(false);
+  const [isUpdateRoleModalOpen, setIsUpdateModalOpen] =
     useState<boolean>(false);
 
   useEffect(() => {
@@ -49,28 +43,6 @@ const Roles: React.FC<RolesProps> = ({ server }) => {
       setLoading(false);
     }
   };
-
-  // const editRole = async (categoryId: string, channelId: string) => {
-  //   try {
-  //     // Update the channel name in the backend
-  //     await axiosInstance.patch(`/roles/${server.id}/${roleId}`, {
-  //       name: editedRoleName,
-  //       description: editedRoleDescription,
-  //     });
-
-  //     // Update the channels state
-  //     setRoles((prevRoles) => {
-  //       return {
-  //         ...prevRoles,
-  //       };
-  //     });
-  //   } catch (error: any) {
-  //     console.error('Error updating role:', error);
-  //     showSnackbar(error.response.data.detail[0].msg, 'error');
-  //   } finally {
-  //     setEditedRoleId(null);
-  //   }
-  // };
 
   const handleDeleteRole = async (roleId: string) => {
     try {
@@ -123,113 +95,96 @@ const Roles: React.FC<RolesProps> = ({ server }) => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">Roles</h2>
         <button
-          onClick={() => setNewRoleNameModal(true)}
+          onClick={() => setIsRoleModalOpen(true)}
           className="text-white bg-button-primary hover:bg-button-hover rounded-lg px-4 py-2"
         >
           Create New Role
         </button>
 
         <CreateRoleModal
-          isOpen={newRoleNameModal}
-          onClose={() => setNewRoleNameModal(false)}
+          isOpen={isRoleModalOpen}
+          onClose={() => setIsRoleModalOpen(false)}
           server={{
             id: server.id,
             name: server.name,
             server_picture_url: server.server_picture_url,
           }}
           onRoleCreated={fetchRoles}
+          initialData={{
+            roleId: '',
+            roleName: '',
+            roleDescription: '',
+            color: '',
+            permissions: [],
+          }}
+          type="create"
         />
       </div>
 
       <div className="mt-4">
         {roles.length === 0 ? (
-          <p>No roles founddd.</p>
+          <p>No roles found.</p>
         ) : (
-          roles.map((role: any) => (
+          roles.map((role: Role) => (
             <div key={role.id} className="mb-4">
-              {
-                <div
-                  key={role.id}
-                  className="flex justify-between items-center flex-grow p-2 mb-2 bg-bg-tertiary dark:bg-dark-tertiary rounded-md"
-                >
-                  {editingRoleId === role.id ? (
-                    <>
-                      <label className="block text-sm font-medium">
-                        Role Name
-                        <input
-                          value={editedRoleName}
-                          onChange={(e) => setEditedRoleName(e.target.value)}
-                          className="w-full bg-bg-secondary border-none p-2 rounded-lg mt-1 outline-none"
-                          placeholder="Enter role name"
-                          autoFocus
-                        />
-                      </label>
-                      <label className="block text-sm font-medium">
-                        Role Description
-                        <input
-                          value={editedRoleDescription}
-                          onChange={(e) =>
-                            setEditedRoleDescription(e.target.value)
-                          }
-                          className="w-full bg-bg-secondary border-none p-2 rounded-lg mt-1 outline-none"
-                          placeholder="Enter role description"
-                        />
-                      </label>
-                      <div>
-                        <button
-                          // onClick={() => editRole(role.id)}
-                          className={`mx-2 ${editedRoleName !== role.name || editedRoleDescription !== role.description ? 'text-green-500' : 'text-gray-500'}`}
-                          disabled={
-                            (editedRoleName === role.name &&
-                              editedRoleDescription === role.description) ||
-                            editedRoleName.trim() === ''
-                          }
-                        >
-                          <i className="fas fa-lg fa-check" />
-                        </button>
-                        <button
-                          onClick={() => setEditedRoleId(null)}
-                          className="text-red-500 mx-2"
-                        >
-                          <i className="fas fa-lg fa-times" />
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex items-center">
-                        <div className="leading-tight">
-                          <span>{role.name}</span>
-                          <br />
-                          <span className="text-sm text-secondary dark:text-dark-text-secondary">
-                            {role.description}
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <button
-                          onClick={() => {
-                            setEditedRoleId(role.id);
-                            setEditedRoleName(role.name);
-                            setEditedRoleDescription(role.description);
-                          }}
-                          className="text-blue-500 mx-2"
-                        >
-                          <i className="fas fa-edit" />
-                        </button>
-                        <button
-                          onClick={() =>
-                            toggleConfirmationDialog(role.id, role.name)
-                          }
-                          className="text-red-500 mx-2"
-                        >
-                          <i className="fas fa-trash" />
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              }
+              {editingRoleId === role.id ? (
+                <CreateRoleModal
+                  isOpen={isRoleModalOpen}
+                  onClose={() => {
+                    setIsRoleModalOpen(false);
+                    setEditedRoleId('');
+                  }}
+                  server={{
+                    id: server.id,
+                    name: server.name,
+                    server_picture_url: server.server_picture_url,
+                  }}
+                  onRoleCreated={fetchRoles}
+                  initialData={{
+                    roleId: editingRoleId,
+                    roleName: role.name,
+                    roleDescription: role.description,
+                    color: role.color,
+                    permissions: role.permissions.map(
+                      (permission) => permission.id
+                    ),
+                  }}
+                  type="update"
+                />
+              ) : (
+                <>
+                  <div className="flex justify-between items-center flex-grow p-2 mb-2 bg-bg-tertiary dark:bg-dark-tertiary rounded-md">
+                    <div className="leading-tight">
+                      <span>{role.name}</span>
+                      <br />
+                      <span className="text-sm text-secondary dark:text-dark-text-secondary">
+                        {role.description}
+                      </span>
+                    </div>
+                    <div>
+                      <button
+                        onClick={() => {
+                          setEditedRoleId(role.id);
+                          setEditedRoleName(role.name);
+                          setEditedRoleDescription(role.description);
+                          setIsRoleModalOpen(true);
+                        }}
+                        className="text-blue-500 mx-2"
+                      >
+                        <i className="fas fa-edit" />
+                      </button>
+                      <button
+                        onClick={() =>
+                          toggleConfirmationDialog(role.id, role.name)
+                        }
+                        className="text-red-500 mx-2"
+                      >
+                        <i className="fas fa-trash" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           ))
         )}
