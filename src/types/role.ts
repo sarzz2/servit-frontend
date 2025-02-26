@@ -5,3 +5,11 @@ export interface Role {
   color: string;
   permissions: any[];
 }
+
+export interface RoleModalData {
+  roleId: string;
+  roleName: string;
+  roleDescription: string;
+  color: string;
+  permissions: string[];
+}

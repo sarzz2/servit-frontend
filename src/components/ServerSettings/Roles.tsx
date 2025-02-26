@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
-import { useSnackbar } from '../Snackbar';
 import { Server } from '../../types/server';
 import ConfirmationDialog from '../Common/ConfirmationDialog';
 import CreateRoleModal from './CreateRoleModal';
@@ -13,17 +12,12 @@ interface RolesProps {
 const Roles: React.FC<RolesProps> = ({ server }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [editingRoleId, setEditedRoleId] = useState<string | null>(null);
-  const [editedRoleDescription, setEditedRoleDescription] =
-    useState<string>('');
-  const [editedRoleName, setEditedRoleName] = useState<string>('');
   const [isRoleModalOpen, setIsRoleModalOpen] = useState<boolean>(false);
   const [roles, setRoles] = useState<Role[]>([]);
   const [isconfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
   const [roleId, setRoleId] = useState<string>('');
   const [confirmMessage, setConfirmMessage] = useState<React.ReactNode>(null);
   const [isConfirmModalButtonDisable, setIsConfirmModalButtonDisable] =
-    useState<boolean>(false);
-  const [isUpdateRoleModalOpen, setIsUpdateModalOpen] =
     useState<boolean>(false);
 
   useEffect(() => {
@@ -35,7 +29,6 @@ const Roles: React.FC<RolesProps> = ({ server }) => {
     setLoading(true);
     try {
       const response = await axiosInstance.get(`/roles/${server.id}`);
-      console.log('roles.tsx data', response.data);
       setRoles(response.data);
     } catch (error) {
       console.error('Error fetching categories or channels:', error);
@@ -165,8 +158,6 @@ const Roles: React.FC<RolesProps> = ({ server }) => {
                       <button
                         onClick={() => {
                           setEditedRoleId(role.id);
-                          setEditedRoleName(role.name);
-                          setEditedRoleDescription(role.description);
                           setIsRoleModalOpen(true);
                         }}
                         className="text-blue-500 mx-2"

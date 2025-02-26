@@ -2,15 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Server } from '../../types/server';
 import axiosInstance from '../../utils/axiosInstance';
 import { useSnackbar } from '../Snackbar';
-import { setPermissions } from '../../slices/permissionsSlice';
-
-interface RoleModalData {
-  roleId: string;
-  roleName: string;
-  roleDescription: string;
-  color: string;
-  permissions: string[];
-}
+import { RoleModalData } from '../../types/role';
 
 interface CreateRoleModalProps {
   isOpen: boolean;
@@ -29,7 +21,6 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
   initialData,
   type,
 }) => {
-  console.log(initialData);
   const [roleName, setRoleName] = useState<string>(initialData.roleName || '');
   const [roleDescription, setRoleDescription] = useState<string>(
     initialData.roleDescription || ''
@@ -46,7 +37,6 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
   const colorInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    console.log(selectedPermissions);
     if (roleName && roleDescription && selectedPermissions.length > 0) {
       setIsButtonDisabled(false);
     } else {
@@ -64,48 +54,48 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
         console.error('Error creating category:', error);
         showSnackbar(error.response.data.detail[0].msg, 'error');
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = () => {
-    if (type === 'create') {
-      axiosInstance
-        .post(`/roles/${server.id}`, {
-          name: roleName,
-          description: roleDescription,
-          color: selectedColor,
-          permissions: selectedPermissions,
-        })
-        .then((response) => {
-          setRoleName('');
-          setRoleDescription('');
-          setRolePermissions([]);
-          showSnackbar('Role created successfully!', 'success');
-          onRoleCreated();
-          onClose();
-        })
-        .catch((error) => {
-          console.error('Error creating role:', error);
-          showSnackbar(error.response.data.detail[0].msg, 'error');
-        });
-    } else {
-      axiosInstance
-        .patch(`/roles/${server.id}/${initialData.roleId}`, {
-          name: roleName,
-          description: roleDescription,
-          color: selectedColor,
-          permissions: selectedPermissions,
-        })
-        .then((response) => {
-          setRoleName('');
-          showSnackbar('Role updated successfully!', 'success');
-          onRoleCreated();
-          onClose();
-        })
-        .catch((error) => {
-          console.error('Error updating role:', error);
-          showSnackbar(error.response.data.detail[0].msg, 'error');
-        });
-    }
+    const filteredPermissions = selectedPermissions.filter(
+      (permission) => permission !== null
+    );
+
+    const roleData = {
+      name: roleName,
+      description: roleDescription,
+      color: selectedColor,
+      permissions: filteredPermissions,
+    };
+
+    const request =
+      type === 'create'
+        ? axiosInstance.post(`/roles/${server.id}`, roleData)
+        : axiosInstance.patch(
+            `/roles/${server.id}/${initialData.roleId}`,
+            roleData
+          );
+
+    request
+      .then((response) => {
+        setRoleName('');
+        setRoleDescription('');
+        setRolePermissions([]);
+        showSnackbar(
+          `Role ${type === 'create' ? 'created' : 'updated'} successfully!`,
+          'success'
+        );
+        onRoleCreated();
+        onClose();
+      })
+      .catch((error) => {
+        console.error(
+          `Error ${type === 'create' ? 'creating' : 'updating'} role:`,
+          error
+        );
+        showSnackbar(error.response.data.detail[0].msg, 'error');
+      });
   };
 
   const handlePermissionToggle = (permissionId: string) => {
@@ -120,29 +110,10 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
 
   const handleColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedColor(event.target.value);
-    console.log(selectedColor);
   };
 
   const handleCircleClick = () => {
     colorInputRef.current!.click();
-  };
-
-  const handleRolePermissions = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    permissionId: string
-  ) => {
-    if (e.target.checked) {
-      setRolePermissions((prevRolePermission) => [
-        ...prevRolePermission,
-        permissionId,
-      ]);
-    } else {
-      setRolePermissions((prevRolePermissions) =>
-        prevRolePermissions.filter(
-          (rolePermission) => rolePermission !== permissionId
-        )
-      );
-    }
   };
 
   if (!isOpen) return null;
@@ -151,7 +122,11 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-10 z-50">
       <div className="bg-bg-primary dark:bg-dark-primary p-6 rounded-lg shadow-lg w-full max-w-2xl h-full max-h-100 overflow-auto scroll-m-0">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Create Role</h2>
+          <h2 className="text-lg font-semibold">
+            {' '}
+            {type === 'create' ? 'Create ' : 'Update '}
+            Role
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 dark:text-white hover:text-gray-900 dark:hover:text-gray-400"
@@ -207,7 +182,14 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
               rolePermissions.map((permission) => (
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-md">
-                    {permission.name.split('_').join(' ').toLowerCase()}
+                    {permission.name
+                      .split('_')
+                      .map(
+                        (word: string) =>
+                          word.charAt(0).toUpperCase() +
+                          word.slice(1).toLowerCase()
+                      )
+                      .join(' ')}
                   </span>
                   <label className="relative inline-block w-10 h-6">
                     <input
@@ -216,7 +198,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                       onChange={() => handlePermissionToggle(permission.id)}
                       className="sr-only peer"
                     />
-                    <div className="w-10 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-green-300 transition-colors duration-300"></div>
+                    <div className="w-10 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 transition-colors duration-300"></div>
                     <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-4"></div>
                   </label>
                 </div>
