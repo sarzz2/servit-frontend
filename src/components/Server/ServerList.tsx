@@ -3,7 +3,6 @@ import axiosInstance from '../../utils/axiosInstance';
 import { useSnackbar } from '../Snackbar';
 import { useDispatch } from 'react-redux';
 import { selectServer } from '../../slices/selectedServerSlice';
-import { setPermissions } from '../../slices/permissionsSlice';
 import { useNavigate } from 'react-router-dom';
 import CreateServerModal from '../Common/CreateServerModal';
 import eventEmitter from '../../utils/eventEmitter';
@@ -52,17 +51,6 @@ const ServerList: React.FC = () => {
   const handleSelectServer = (serverId: string, serverName: string) => {
     dispatch(selectServer({ id: serverId, name: serverName }));
     navigate(`/home/${serverId}`);
-
-    // Fetch permissions for the selected server
-    axiosInstance
-      .get(`/servers/${serverId}/roles_permissions`)
-      .then((response) => {
-        dispatch(setPermissions(response.data));
-      })
-      .catch((error) => {
-        console.error(error);
-        showSnackbar('Error loading permissions', 'error');
-      });
   };
 
   return (

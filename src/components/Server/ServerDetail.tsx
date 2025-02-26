@@ -86,7 +86,7 @@ const ServerDetail: React.FC = () => {
       if (permissionSet.size === 0) {
         try {
           const permissions = await fetchPermissions(serverId);
-          dispatch(setPermissions(permissions));
+          if (permissions) dispatch(setPermissions(permissions));
         } catch (error) {
           console.error(error);
           showSnackbar('Error loading permissions', 'error');
