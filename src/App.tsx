@@ -25,6 +25,7 @@ import LoginPage from './pages/LoginPage';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { setUserOnlineStatus } from './slices/onlineStatusSlice';
 import { goAxiosInstance } from './utils/axiosInstance';
+import WebSocketProvider from './components/WebSocketProvider';
 
 const App: React.FC = () => {
   const { theme } = useTheme();
@@ -154,71 +155,73 @@ const App: React.FC = () => {
   return (
     <div className={`flex flex-col min-h-screen ${theme}`}>
       <SnackbarProvider>
-        <AuthPopup />
+        <WebSocketProvider>
+          <AuthPopup />
 
-        {(location.pathname === '/' || location.pathname === '/login') && (
-          <Header />
-        )}
+          {(location.pathname === '/' || location.pathname === '/login') && (
+            <Header />
+          )}
 
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/login/:sudo" element={<LoginPage />} />
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/login/:sudo" element={<LoginPage />} />
 
-            {/* Routes that require authentication */}
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
+              {/* Routes that require authentication */}
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/profile/:service"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/profile/:service"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/home"
-              element={
-                <ProtectedRoute>
-                  <ServerLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="direct" element={<DirectMessage />} />
-              <Route path=":serverId" element={<ServerDetail />}></Route>
-            </Route>
+              <Route
+                path="/home"
+                element={
+                  <ProtectedRoute>
+                    <ServerLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="direct" element={<DirectMessage />} />
+                <Route path=":serverId" element={<ServerDetail />}></Route>
+              </Route>
 
-            <Route
-              path="/settings/:serverId"
-              element={
-                <ProtectedRoute>
-                  <PermissionRoute
-                    requiredPermissions={[
-                      'MANAGE_SERVER',
-                      'MANAGE_CHANNELS',
-                      'OWNER',
-                    ]}
-                  >
-                    <ServerSettings />
-                  </PermissionRoute>
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </main>
+              <Route
+                path="/settings/:serverId"
+                element={
+                  <ProtectedRoute>
+                    <PermissionRoute
+                      requiredPermissions={[
+                        'MANAGE_SERVER',
+                        'MANAGE_CHANNELS',
+                        'OWNER',
+                      ]}
+                    >
+                      <ServerSettings />
+                    </PermissionRoute>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </main>
 
-        {(location.pathname === '/' || location.pathname === '/login') && (
-          <Footer />
-        )}
+          {(location.pathname === '/' || location.pathname === '/login') && (
+            <Footer />
+          )}
+        </WebSocketProvider>
       </SnackbarProvider>
     </div>
   );

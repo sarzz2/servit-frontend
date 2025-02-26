@@ -4,13 +4,24 @@ import axiosInstance from '../../utils/axiosInstance';
 import { useSnackbar } from '../Snackbar';
 import ConfirmationDialog from '../Common/ConfirmationDialog';
 import AddFriendPopup from './AddFriendPopup';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../Store';
 
 interface FriendsProps {
   fetchFriends: (view: string) => void;
   friends: Friend[];
+  setActiveChat: (friend: any) => void;
+  setFriendsWindow: (value: boolean) => void;
+  setToUserId: (value: string) => void;
 }
 
-const Friends: React.FC<FriendsProps> = ({ friends, fetchFriends }) => {
+const Friends: React.FC<FriendsProps> = ({
+  friends,
+  fetchFriends,
+  setActiveChat,
+  setFriendsWindow,
+  setToUserId,
+}) => {
   const [view, setView] = useState<'all' | 'pending' | 'blocked'>('all');
   const [openOptions, setOpenOptions] = useState<string | null>(null);
   const [isConfirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
@@ -19,6 +30,7 @@ const Friends: React.FC<FriendsProps> = ({ friends, fetchFriends }) => {
     useState<boolean>(false);
   const { showSnackbar } = useSnackbar();
   const optionsRef = useRef<HTMLDivElement | null>(null);
+  const user = useSelector((state: RootState) => state.user.user);
 
   useEffect(() => {
     fetchFriends(view);
@@ -148,6 +160,21 @@ const Friends: React.FC<FriendsProps> = ({ friends, fetchFriends }) => {
                   onClick={() => handleToggleOptions(friend.user_id)}
                 >
                   <i className="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+
+                <button
+                  className="absolute top-2 right-8 p-2 outline-none"
+                  onClick={() => {
+                    setFriendsWindow(false);
+                    setActiveChat(friend);
+                    setToUserId(
+                      friend.user_id !== user?.id
+                        ? friend.user_id
+                        : friend.friend_id
+                    );
+                  }}
+                >
+                  <i className="fa-solid fa-comment"></i>
                 </button>
 
                 {/* Dropdown Options */}

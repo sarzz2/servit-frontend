@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../Store';
 import { useSnackbar } from '../Snackbar';
+import { goAxiosInstance } from '../../utils/axiosInstance';
 
 const ChatWindow = ({
   activeChat,
@@ -19,172 +20,143 @@ const ChatWindow = ({
   const [messages, setMessages] = useState<
     {
       id: string;
-      from_user_id: string;
-      to_user_id: string;
+      sender_id: string;
+      receiver_id: string;
       content: string;
-      created_at: string;
+      timestamp: string;
     }[]
   >([]);
-  const [page, setPage] = useState(2);
+  const [pagingState, setPagingState] = useState('');
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState<string | null>(null);
-  const socketRef = useRef<WebSocket | null>(null);
+  const socket = useSelector((state: RootState) => state.ws.connection);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const messageEndRef = useRef<HTMLDivElement | null>(null);
-  const retryInterval = useRef<number | null>(null);
   const typingTimeoutRef = useRef<number | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const { showSnackbar } = useSnackbar();
   const userId = user?.id;
 
-  const connectWebSocket = () => {
-    const wsUrl = `ws://localhost:8080?from_user_id=${userId}&to_user_id=${toUserId}&token=${localStorage.getItem('access_token')}`;
-    socketRef.current = new WebSocket(wsUrl);
-
-    socketRef.current.onopen = function () {
-      console.log('WebSocket opened. Requesting initial messages...');
-
-      // Send an initial request for chat history
-      const initPayload = {
-        toUserID: toUserId,
-        type: 'init',
-      };
-      socketRef.current?.send(JSON.stringify(initPayload));
-    };
-
-    socketRef.current.onmessage = (event) => {
-      const receivedMessage = JSON.parse(event.data);
-
-      // Check if it's the initial message batch or a single message
-      if (Array.isArray(receivedMessage)) {
-        setMessages((prevMessages) => {
-          const existingMessageIds = new Set(prevMessages.map((msg) => msg.id)); // Assuming each message has a unique 'id'
-          const newMessages = receivedMessage.filter(
-            (msg) => !existingMessageIds.has(msg.id)
-          );
-          return [...newMessages.reverse(), ...prevMessages]; // Add new messages at the bottom
-        });
-      } else if (
-        receivedMessage.type === 'typing' &&
-        receivedMessage.from_user_id !== userId
-      ) {
-        setIsTyping(true);
-        setTypingUser(receivedMessage.from_user_id);
-      } else if (
-        receivedMessage.type === 'not_typing' &&
-        receivedMessage.from_user_id !== userId
-      ) {
-        setIsTyping(false);
-        setTypingUser(null);
-      } else {
-        setMessages((prevMessages) => {
-          const existingMessageIds = new Set(prevMessages.map((msg) => msg.id));
-          if (!existingMessageIds.has(receivedMessage.id)) {
-            return [...prevMessages, receivedMessage]; // Append only new messages
-          }
-          return prevMessages; // No change if the message already exists
-        });
-      }
-    };
-
-    socketRef.current.onclose = () => {
-      setMessages([]);
-      setHasMore(true);
-      setPage(2);
-      setLoadingMore(false);
-      console.log('WebSocket closed');
-      retryConnection();
-    };
-
-    socketRef.current.onerror = (error) => {
-      showSnackbar(
-        'An error occurred while connecting to the server! Retrying...',
-        'error'
-      );
-      console.error('WebSocket error:', error);
-      socketRef.current?.close();
-    };
-  };
-
-  const retryConnection = () => {
-    if (retryInterval.current) return; // Prevent multiple retries
-
-    retryInterval.current = window.setTimeout(() => {
-      console.log('Retrying WebSocket connection...');
-      connectWebSocket();
-      retryInterval.current = null;
-    }, 3000);
-  };
-
-  const sendTypingIndicator = (isTyping: boolean) => {
-    if (socketRef.current) {
-      const typingPayload = {
-        from_user_id: userId || '',
-        to_user_id: toUserId,
-        type: isTyping ? 'typing' : 'not_typing',
-      };
-      socketRef.current.send(JSON.stringify(typingPayload));
-    }
-  };
-
+  // When the chat is opened (or toUserId/activeChat changes), fetch messages and send a switch_chat event.
   useEffect(() => {
-    if (activeChat) {
-      connectWebSocket();
-
-      return () => {
-        socketRef.current?.close();
-        if (retryInterval.current) {
-          window.clearTimeout(retryInterval.current);
-        }
-        if (typingTimeoutRef.current) {
-          window.clearTimeout(typingTimeoutRef.current);
-        }
+    fetchMessages();
+    if (socket && activeChat && userId) {
+      const switchPayload = {
+        type: 'switch_chat',
+        data: { chat_type: 'dm', chat_id: toUserId },
       };
+      socket.send(JSON.stringify(switchPayload));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toUserId, activeChat, userId]);
+  }, [socket, toUserId, activeChat, userId]);
 
+  // Listen for incoming messages from the global WebSocket.
   useEffect(() => {
-    if (messages.length > 0 && page <= 2 && chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
-    }
-  }, [messages, page]);
+    if (!socket) return;
 
-  const handleTyping = () => {
-    sendTypingIndicator(true);
+    const handleMessage = (event: MessageEvent) => {
+      const received = JSON.parse(event.data);
+      console.log(received);
 
-    if (typingTimeoutRef.current) {
-      window.clearTimeout(typingTimeoutRef.current);
-    }
-    typingTimeoutRef.current = window.setTimeout(() => {
-      sendTypingIndicator(false);
-    }, 2000);
-  };
-
-  const loadMoreMessages = async () => {
-    if (!loadingMore && hasMore) {
-      setLoadingMore(true);
-      try {
-        const response = await fetch(
-          `http://localhost:8080/fetch_paginated_messages?to_user_id=${toUserId}&page=${page}&token=${localStorage.getItem('access_token')}`
-        );
-        const olderMessages = await response.json();
-
-        if (olderMessages?.length > 0) {
-          setMessages((prevMessages) => [...olderMessages, ...prevMessages]);
-          setPage(page + 1);
-        } else {
-          setHasMore(false); // No more messages to load
-        }
-      } catch (error) {
-        showSnackbar('Error loading messages', 'error');
-        console.error('Error loading more messages:', error);
-      } finally {
-        setLoadingMore(false);
+      // Handle historical messages (array)
+      if (Array.isArray(received)) {
+        setMessages((prev) => {
+          const existingIds = new Set(prev.map((msg) => msg.id));
+          const newMsgs = received.filter(
+            (msg: any) => !existingIds.has(msg.id)
+          );
+          return [...newMsgs.reverse(), ...prev];
+        });
       }
+      // Handle direct_message type
+      else if (received.type === 'direct_message') {
+        const messageData = received.data;
+        setMessages((prev) => {
+          const existingIds = new Set(prev.map((msg) => msg.id));
+          if (!existingIds.has(messageData.id)) {
+            return [
+              ...prev,
+              {
+                id: messageData.id || Date.now().toString(),
+                sender_id: messageData.sender_id,
+                receiver_id: messageData.receiver_id,
+                content: messageData.content,
+                timestamp: messageData.timestamp || new Date().toISOString(),
+              },
+            ];
+          }
+          return prev;
+        });
+      }
+      // Handle typing indicators for DM
+      else if (received.type === 'typing') {
+        if (received.from_user_id !== userId) {
+          setIsTyping(true);
+          setTypingUser(received.from_user_id);
+        }
+      }
+      // Handle not_typing indicator
+      else if (received.type === 'not_typing') {
+        if (received.from_user_id !== userId) {
+          setIsTyping(false);
+          setTypingUser(null);
+        }
+      }
+      // Handle notifications
+      else if (received.type === 'notification') {
+        showSnackbar(received.message, 'success');
+      }
+      // Reset typing state for any other messages
+      else {
+        setIsTyping(false);
+        setTypingUser(null);
+      }
+    };
+    socket.addEventListener('message', handleMessage);
+    return () => {
+      socket.removeEventListener('message', handleMessage);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket, userId]);
+
+  // Add beforeunload listener and cleanup to send not_typing event when tab/chat closes.
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      sendTypingIndicator(false);
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      sendTypingIndicator(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket, userId]);
+
+  // Fetch historical messages via REST
+  const fetchMessages = async () => {
+    const encodedPagingState = encodeURIComponent(pagingState);
+
+    try {
+      const response = await goAxiosInstance.get(
+        `http://localhost:8080/fetch_paginated_messages?to_user_id=${toUserId}&paging_state=${encodedPagingState}&token=${localStorage.getItem(
+          'access_token'
+        )}`
+      );
+
+      const olderMessages = response.data.messages;
+      setPagingState(response.data.paging_state);
+      console.log(response);
+      if (olderMessages?.length > 0) {
+        setMessages((prev) => [...olderMessages.reverse(), ...prev]);
+      }
+      if (response.data.paging_state === '') {
+        setHasMore(false);
+      }
+    } catch (error) {
+      showSnackbar('Error loading messages', 'error');
+      console.error('Error loading more messages:', error);
     }
   };
 
@@ -193,7 +165,6 @@ const ChatWindow = ({
       if (chatContainerRef.current.scrollTop === 0 && hasMore) {
         loadMoreMessages();
       }
-      // Check if the user scrolled up to show the arrow
       setShowScrollToBottom(
         chatContainerRef.current.scrollTop <
           chatContainerRef.current.scrollHeight -
@@ -202,20 +173,60 @@ const ChatWindow = ({
     }
   };
 
-  const sendMessage = () => {
-    if (socketRef.current && message.trim()) {
-      const msg = {
-        from_user_id: userId || '',
-        to_user_id: toUserId,
-        content: message,
+  const loadMoreMessages = async () => {
+    if (!loadingMore && hasMore) {
+      setLoadingMore(true);
+      await fetchMessages();
+      setLoadingMore(false);
+    }
+  };
+
+  // Send typing indicator using the WSMessage payload structure.
+  const sendTypingIndicator = (isTyping: boolean) => {
+    if (socket && userId) {
+      const typingPayload = {
+        type: isTyping ? 'typing' : 'not_typing',
+        data: {
+          chat_type: 'dm',
+          from_user_id: userId,
+          to_user_id: toUserId,
+        },
       };
-      socketRef.current.send(JSON.stringify(msg));
-      setMessages((prevMessages) => [
-        ...prevMessages,
+      socket.send(JSON.stringify(typingPayload));
+    }
+  };
+
+  const handleTyping = () => {
+    sendTypingIndicator(true);
+    if (typingTimeoutRef.current) {
+      window.clearTimeout(typingTimeoutRef.current);
+    }
+    typingTimeoutRef.current = window.setTimeout(() => {
+      sendTypingIndicator(false);
+    }, 2000);
+  };
+
+  // Existing sendMessage implementation remains unchanged.
+  const sendMessage = () => {
+    if (socket && message.trim() && userId) {
+      const dmMessage = {
+        type: 'direct_message',
+        data: {
+          sender_id: userId,
+          receiver_id: toUserId,
+          content: message,
+          timestamp: new Date().toISOString(),
+        },
+      };
+      socket.send(JSON.stringify(dmMessage));
+      setMessages((prev) => [
+        ...prev,
         {
-          ...msg,
           id: `${Date.now()}`,
-          created_at: new Date().toISOString(),
+          sender_id: dmMessage.data.sender_id,
+          receiver_id: dmMessage.data.receiver_id,
+          content: dmMessage.data.content,
+          timestamp: new Date().toISOString(),
         },
       ]);
       setMessage('');
@@ -227,7 +238,6 @@ const ChatWindow = ({
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       sendMessage();
-      // Scroll to the bottom after sending a message
       setTimeout(() => {
         messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
@@ -241,7 +251,6 @@ const ChatWindow = ({
       {activeChat ? (
         <>
           <div className="flex items-center justify-between bg-bg-primary dark:bg-dark-primary p-4 rounded-lg">
-            {/* User info with avatar */}
             <div className="flex items-center space-x-3">
               <img
                 src={activeChat.profile_picture_url}
@@ -252,8 +261,6 @@ const ChatWindow = ({
                 {activeChat.username}
               </h2>
             </div>
-
-            {/* Action buttons */}
             <div className="flex items-center space-x-4">
               <button className="hover:text-primary dark:hover:text-dark-text-primary">
                 <i className="fas fa-phone" />
@@ -267,8 +274,6 @@ const ChatWindow = ({
               <button className="hover:text-primary dark:hover:text-dark-text-primary">
                 <i className="fas fa-user-plus" />
               </button>
-
-              {/* Search bar */}
               <div className="relative">
                 <input
                   type="text"
@@ -279,8 +284,6 @@ const ChatWindow = ({
               </div>
             </div>
           </div>
-
-          {/* Chat messages */}
           <div
             ref={chatContainerRef}
             className="h-[600px] bg-gray-100 dark:bg-dark-secondary p-4 rounded-lg overflow-y-auto"
@@ -298,12 +301,10 @@ const ChatWindow = ({
                 <div
                   key={index}
                   className={`flex mb-4 ${
-                    msg.from_user_id === userId
-                      ? 'justify-end'
-                      : 'justify-start'
+                    msg.sender_id === userId ? 'justify-end' : 'justify-start'
                   }`}
                 >
-                  {msg.from_user_id !== userId && (
+                  {msg.sender_id !== userId && (
                     <img
                       src={activeChat.profile_picture_url}
                       alt={activeChat.username}
@@ -312,9 +313,7 @@ const ChatWindow = ({
                   )}
                   <div
                     className={`p-3 rounded-lg ${
-                      msg.from_user_id === userId
-                        ? 'bg-blue-500'
-                        : 'bg-gray-500'
+                      msg.sender_id === userId ? 'bg-blue-500' : 'bg-gray-500'
                     }`}
                   >
                     <p>{msg.content}</p>
@@ -322,7 +321,7 @@ const ChatWindow = ({
                       {(() => {
                         try {
                           return format(
-                            new Date(msg.created_at),
+                            new Date(msg.timestamp),
                             'MMMM do, yyyy H:mma'
                           );
                         } catch {
@@ -331,7 +330,7 @@ const ChatWindow = ({
                       })()}
                     </span>
                   </div>
-                  {msg.from_user_id === userId && (
+                  {msg.sender_id === userId && (
                     <img
                       src={user?.profilePicture}
                       alt={user?.profilePicture}
@@ -351,19 +350,17 @@ const ChatWindow = ({
                   });
                   setShowScrollToBottom(false);
                 }}
-                className="w-10 absolute left-1/2 transform -translate-x-1/2 bottom-[130px] bg-tertiary dark:bg-dark-tertiary  hover:bg-button-hover dark:hover:bg-dark-button-hover rounded-full p-2 shadow-lg" // Positioned above textarea
+                className="w-10 absolute left-1/2 transform -translate-x-1/2 bottom-[130px] bg-tertiary dark:bg-dark-tertiary hover:bg-button-hover dark:hover:bg-dark-button-hover rounded-full p-2 shadow-lg"
               >
                 <i className="fas fa-arrow-down" />
               </button>
             )}
           </div>
-
-          {isTyping && typingUser && (
+          {isTyping && (
             <div className="text-gray-500 mt-2 animate-pulse">
               {activeChat.username} is typing...
             </div>
           )}
-
           <div
             className={`${isTyping && typingUser ? '' : 'mt-4'} flex items-center space-x-2`}
           >

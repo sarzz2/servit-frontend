@@ -48,7 +48,13 @@ const DirectMessageComponent = () => {
         setToUserId={setToUserId}
       />
       {friendsWindow ? (
-        <Friends fetchFriends={fetchFriends} friends={friends} />
+        <Friends
+          fetchFriends={fetchFriends}
+          friends={friends}
+          setActiveChat={setActiveChat}
+          setFriendsWindow={setFriendsWindow}
+          setToUserId={setToUserId}
+        />
       ) : (
         <ChatWindow activeChat={activeChat || null} toUserId={toUserId} />
       )}
