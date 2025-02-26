@@ -53,6 +53,31 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
     setHasChanges(false);
   };
 
+  const handleRegenerateInviteCode = async () => {
+    try {
+      const response = await axiosInstance.patch(
+        `/servers/regenerate_invite_code/${tempServer.id}`
+      );
+
+      if (response.status === 200) {
+        setInitialServer({
+          ...initialServer,
+          invite_code: response.data.invite_code,
+        });
+        setTempServer({
+          ...tempServer,
+          invite_code: response.data.invite_code,
+        });
+      }
+    } catch (error: any) {
+      if (error.response && error.response.status === 429) {
+        showSnackbar('Too Many Requests! Please try again later.', 'error');
+      } else {
+        console.error('Error regenerating invite code:', error);
+      }
+    }
+  };
+
   return (
     <div className="bg-bg-primary dark:bg-dark-primary rounded-lg p-6">
       <div className="flex items-center mb-6">
@@ -134,6 +159,24 @@ const Overview: React.FC<OverviewProps> = ({ server, setServer }) => {
           <div className="w-10 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-green-300 transition-colors duration-300"></div>
           <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 transform peer-checked:translate-x-4"></div>
         </label>
+      </div>
+
+      <div className="flex justify-between items-center mb-4">
+        <div className="w-full flex items-center justify-between">
+          <label className="font-medium mb-2">Invite Code</label>
+          <div className="flex justify-end items-center gap-3">
+            <input
+              type="text"
+              value={tempServer.invite_code || ''}
+              className="flex-grow-1 bg-bg-secondary dark:bg-dark-secondary outline-none border-gray-300 dark:border-dark-border p-2 rounded-lg"
+            />
+            <i
+              className="fas fa-lg fa-solid fa-rotate cursor-pointer"
+              onClick={handleRegenerateInviteCode}
+              title="Regenerate Invite Code"
+            ></i>
+          </div>
+        </div>
       </div>
 
       <SaveCancelButtons

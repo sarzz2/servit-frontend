@@ -101,6 +101,7 @@ const Roles: React.FC<RolesProps> = ({ server }) => {
             id: server.id,
             name: server.name,
             server_picture_url: server.server_picture_url,
+            invite_code: server.invite_code,
           }}
           onRoleCreated={fetchRoles}
           initialData={{
@@ -131,6 +132,7 @@ const Roles: React.FC<RolesProps> = ({ server }) => {
                     id: server.id,
                     name: server.name,
                     server_picture_url: server.server_picture_url,
+                    invite_code: server.invite_code,
                   }}
                   onRoleCreated={fetchRoles}
                   initialData={{

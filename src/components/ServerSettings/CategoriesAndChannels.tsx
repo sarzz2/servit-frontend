@@ -259,6 +259,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
             id: server.id,
             name: server.name,
             server_picture_url: server.server_picture_url,
+            invite_code: server.invite_code,
           }}
           onCategoryCreated={fetchCategories}
         />
