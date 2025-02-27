@@ -107,8 +107,8 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
       await axiosInstance.delete(`/category/${server.id}/${categoryId}`);
       showSnackbar('Category deleted successfully!', 'success');
       setCategories(categories.filter((cat) => cat.id !== categoryId));
-    } catch (error) {
-      showSnackbar('Error deleting category!', 'error');
+    } catch (error: any) {
+      showSnackbar(error.response.data.error, 'error');
     } finally {
       setIsConfirmModalButtonDisable(false);
     }
@@ -181,7 +181,8 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
           ? prevChannels[categoryId].filter((chan) => chan.id !== channelId)
           : [], // Fallback to empty array if category doesn't exist
       }));
-    } catch (error) {
+    } catch (error: any) {
+      showSnackbar(error.response.data.error, 'error');
       console.error('Error deleting channel:', error);
     } finally {
       setIsConfirmModalButtonDisable(false);

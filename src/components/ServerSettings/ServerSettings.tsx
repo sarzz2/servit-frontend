@@ -4,6 +4,7 @@ import axiosInstance from '../../utils/axiosInstance';
 import Overview from './Overview';
 import CategoriesAndChannels from './CategoriesAndChannels';
 import Roles from './Roles';
+import AuditLogs from './AuditLogs';
 
 const ServerSettings: React.FC = () => {
   const { serverId } = useParams<{ serverId: string }>();
@@ -31,6 +32,8 @@ const ServerSettings: React.FC = () => {
         return <CategoriesAndChannels server={server} />;
       case 'roles':
         return <Roles server={server} />;
+      case 'audit-logs':
+        return <AuditLogs server={server} />;
       default:
         return <Overview server={server} setServer={setServer} />;
     }
@@ -70,6 +73,16 @@ const ServerSettings: React.FC = () => {
             onClick={() => setSelectedSetting('roles')}
           >
             Roles
+          </li>
+          <li
+            className={`py-2 px-4 hover:bg-hover-bg dark:hover:bg-dark-hover cursor-pointer rounded-lg mb-2 ${
+              selectedSetting === 'audit-logs'
+                ? 'bg-hover-bg dark:bg-dark-hover'
+                : ''
+            }`}
+            onClick={() => setSelectedSetting('audit-logs')}
+          >
+            Audit Logs
           </li>
         </ul>
       </aside>
