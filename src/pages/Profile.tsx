@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PersonalInformation from '../components/User/PersonalInformation';
 import SecuritySettings from '../components/User/SecuritySettings';
+import GeneralInformation from '../components/User/GeneralInformation';
 
 const Profile: React.FC = () => {
   const [activeSection, setActiveSection] = useState('personal-info');
@@ -17,6 +18,8 @@ const Profile: React.FC = () => {
 
   const renderActiveSection = () => {
     switch (activeSection) {
+      case 'general-info':
+        return <GeneralInformation />;
       case 'personal-info':
         return <PersonalInformation />;
       case 'security':
@@ -45,6 +48,16 @@ const Profile: React.FC = () => {
           </h2>
         </div>
         <ul>
+          <li
+            className={`mb-4 cursor-pointer hover:bg-button-hover dark:hover:bg-dark-button-hover rounded p-2 ${
+              activeSection === 'general-info'
+                ? 'bg-button-hover dark:bg-dark-button-hover'
+                : 'text-text-primary'
+            }`}
+            onClick={() => setActiveSection('general-info')}
+          >
+            General
+          </li>
           <li
             className={`mb-4 cursor-pointer hover:bg-button-hover dark:hover:bg-dark-button-hover rounded p-2 ${
               activeSection === 'personal-info'

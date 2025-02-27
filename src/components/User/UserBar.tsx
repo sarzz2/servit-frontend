@@ -71,7 +71,6 @@ const UserBar: React.FC = () => {
               >
                 User Profile
               </li>
-              <li className="p-3 cursor-pointer hover:bg-hover-bg">Settings</li>
               <li
                 className="p-3 cursor-pointer text-red-600 hover:bg-hover-bg"
                 onClick={handleLogout}
