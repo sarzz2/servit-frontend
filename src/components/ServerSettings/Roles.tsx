@@ -19,6 +19,7 @@ const Roles: React.FC<RolesProps> = ({ server }) => {
   const [confirmMessage, setConfirmMessage] = useState<React.ReactNode>(null);
   const [isConfirmModalButtonDisable, setIsConfirmModalButtonDisable] =
     useState<boolean>(false);
+  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRoles();
@@ -79,6 +80,11 @@ const Roles: React.FC<RolesProps> = ({ server }) => {
     setConfirmMessage('');
   };
 
+  const handleSelectedRole = (value: string) => {
+    console.log(value);
+    setSelectedRoleId(value);
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -114,7 +120,46 @@ const Roles: React.FC<RolesProps> = ({ server }) => {
           type="create"
         />
       </div>
-
+      <div className="flex gap-4">
+        <div className="w-full">
+          {roles.map((role: Role) => (
+            <div key={role.id} className="mb-4">
+              <div
+                onClick={() => handleSelectedRole(role.id)}
+                className={`flex justify-between items-center flex-grow p-2 mb-2 rounded-md cursor-pointer '
+                  ${selectedRoleId === role.id ? 'bg-hover-bg dark:bg-dark-hover' : 'bg-bg-tertiary dark:bg-dark-tertiary'}
+                `}
+              >
+                <div className="leading-tight">
+                  <span>{role.name}</span>
+                  <br />
+                  <span className="text-sm text-secondary dark:text-dark-text-secondary">
+                    {role.description}
+                  </span>
+                </div>
+                <div>
+                  <button
+                    onClick={() => {
+                      setEditedRoleId(role.id);
+                      setIsRoleModalOpen(true);
+                    }}
+                    className="text-blue-500 mx-2"
+                  >
+                    <i className="fas fa-edit" />
+                  </button>
+                  <button
+                    onClick={() => toggleConfirmationDialog(role.id, role.name)}
+                    className="text-red-500 mx-2"
+                  >
+                    <i className="fas fa-trash" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="grow-1">{selectedRoleId}</div>
+      </div>
       <div className="mt-4">
         {roles.length === 0 ? (
           <p>No roles found.</p>
