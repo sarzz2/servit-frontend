@@ -11,7 +11,10 @@ const DirectMessageComponent = () => {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [friendsWindow, setFriendsWindow] = useState<boolean>(true);
 
-  const fetchFriends = (type: string) => {
+  const fetchFriends = (
+    type: string,
+    filters?: { search_query?: string; page?: number }
+  ) => {
     let endpoint = '';
     if (type === 'pending') {
       endpoint = '/friends/requests';
@@ -20,8 +23,15 @@ const DirectMessageComponent = () => {
     } else {
       endpoint = '/friends';
     }
+
+    // Construct query parameters if filters exist
+    const params = new URLSearchParams();
+    if (filters?.search_query)
+      params.append('search_query', filters.search_query);
+    if (filters?.page) params.append('page', filters.page.toString());
+
     axiosInstance
-      .get(endpoint)
+      .get(`${endpoint}?${params.toString()}`) // Append query params
       .then((response) => {
         const friendsData = response.data.map((friend: Friend) => ({
           id: friend.id,

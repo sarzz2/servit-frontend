@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../Store';
 
 interface FriendsProps {
-  fetchFriends: (view: string) => void;
+  fetchFriends: (view: string, filters?: any) => void;
   friends: Friend[];
   setActiveChat: (friend: any) => void;
   setFriendsWindow: (value: boolean) => void;
@@ -31,11 +31,17 @@ const Friends: React.FC<FriendsProps> = ({
   const { showSnackbar } = useSnackbar();
   const optionsRef = useRef<HTMLDivElement | null>(null);
   const user = useSelector((state: RootState) => state.user.user);
-
+  const [filters, setFilters] = useState({
+    search_query: '',
+    page: 1,
+  });
   useEffect(() => {
-    fetchFriends(view);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view]);
+    const delayDebounce = setTimeout(() => {
+      fetchFriends(view, filters);
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [filters, view, fetchFriends]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -127,6 +133,18 @@ const Friends: React.FC<FriendsProps> = ({
           <AddFriendPopup onClose={() => setShowAddFriendPopup(false)} />
         )}
       </div>
+      <input
+        type="text"
+        placeholder="Search"
+        className="w-full p-2 mt-4 rounded-lg bg-gray-200 dark:bg-dark-secondary outline-none"
+        onChange={(e) =>
+          setFilters((prev) => ({
+            ...prev,
+            search_query: e.target.value,
+            page: 1, // Reset to first page on new search
+          }))
+        }
+      />
 
       <div className="mt-4">
         {view === 'all' && (
