@@ -41,7 +41,8 @@ const Friends: React.FC<FriendsProps> = ({
     }, 500);
 
     return () => clearTimeout(delayDebounce);
-  }, [filters, view, fetchFriends]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
