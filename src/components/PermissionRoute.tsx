@@ -5,6 +5,7 @@ import { setPermissions } from '../slices/permissionsSlice';
 import { useSnackbar } from './Snackbar';
 import { RootState } from '../Store';
 import { fetchPermissions } from '../utils/fetchPermissions';
+import { JSX } from 'react/jsx-runtime';
 
 interface PermissionRouteProps {
   children: JSX.Element;

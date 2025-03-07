@@ -88,8 +88,8 @@ const ServerSettings: React.FC = () => {
       </aside>
 
       {/* Main Content */}
-      <div className="w-3/4 bg-bg-secondary dark:bg-dark-secondary p-6 overflow-auto">
-        <div className="flex justify-between items-center mb-6">
+      <div className="w-3/4 bg-bg-secondary dark:bg-dark-secondary p-6 overflow-auto h-full flex flex-col gap-6">
+        <div className="flex justify-between items-center grow-0">
           <h2 className="text-2xl font-semibold">Server Settings</h2>
           <button
             className="bg-hover-bg p-2 rounded-full"

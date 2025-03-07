@@ -1,9 +1,11 @@
+import { Permission } from "./permission";
+
 export interface Role {
   id: string;
   name: string;
   description: string;
   color: string;
-  permissions: any[];
+  permissions: Permission[];
 }
 
 export interface RoleModalData {
