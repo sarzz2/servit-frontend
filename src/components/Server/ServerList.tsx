@@ -50,9 +50,15 @@ const ServerList: React.FC = () => {
       const response = await axiosInstance.get('/servers/user_servers');
       const servers = response.data.servers;
       setServers(servers);
+      console.log(servers);
       // Fetch notification preferences for each server
       for (const server of servers) {
-        await fetchNotificationPreference(server.id);
+        dispatch(
+          setNotificationPreference({
+            serverId: server.id,
+            preference: server.default_notification_setting || 'all',
+          })
+        );
       }
     } catch (error) {
       console.error(error);
@@ -64,25 +70,6 @@ const ServerList: React.FC = () => {
     dispatch(selectServer({ id: serverId, name: serverName }));
     dispatch(selectChannel({ id: null, name: null }));
     navigate(`/home/${serverId}`);
-  };
-
-  // Function to fetch and set notification preference from the API.
-  const fetchNotificationPreference = async (serverId: string) => {
-    try {
-      const response = await axiosInstance.get(
-        `/servers/notification/${serverId}`
-      );
-      if (response.data) {
-        dispatch(
-          setNotificationPreference({
-            serverId,
-            preference: response.data.notification_preference || 'all',
-          })
-        );
-      }
-    } catch (error) {
-      console.error('Error fetching notification preference', error);
-    }
   };
 
   return (
