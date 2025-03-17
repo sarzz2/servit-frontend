@@ -18,7 +18,6 @@ const SecuritySettings: React.FC = () => {
   const [isMessageColorRed, setisMessageColorRed] = useState<boolean>(true);
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e);
     setPasswordData((prevData) => ({
       ...prevData,
       [e.target.name]: e.target.value,

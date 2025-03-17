@@ -9,12 +9,13 @@ import CreateCategoryModal from '../ServerSettings/CreateCategoryModal';
 import ConfirmationDialog from '../Common/ConfirmationDialog';
 import ChannelChat from '../../pages/ChannelChat';
 import { Server } from '../../types/server';
-import { Channel } from '../../types/channel';
 import { fetchPermissions } from '../../utils/fetchPermissions';
 import { setPermissions } from '../../slices/permissionsSlice';
 import UserBar from '../User/UserBar';
 import eventEmitter from '../../utils/eventEmitter';
 import CreateChannelModal from '../ServerSettings/CreateChannelModal';
+import { selectChannel } from '../../slices/selectedChannelSlice';
+import { useNotifications } from '../../contexts/NotificationProvider';
 
 export interface CreateChannelProps {
   channelName: string;
@@ -26,14 +27,9 @@ const ServerDetail: React.FC = () => {
     []
   );
   const [channels, setChannels] = useState<{
-    [key: string]: {
-      description: any;
-      id: string;
-      name: string;
-    }[];
+    [key: string]: { description: string; id: string; name: string }[];
   }>({});
   const [isDropdownOpen, setDropdownOpen] = useState<boolean>(false);
-  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [newCategoryNameModal, setNewCategoryNameModal] =
     useState<boolean>(false);
   const [isConfirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
@@ -51,11 +47,25 @@ const ServerDetail: React.FC = () => {
   const selectedServer = useSelector(
     (state: RootState) => state.selectedServer
   );
+  const selectedChannel = useSelector(
+    (state: RootState) => state.selectedChannel
+  );
   const { serverId } = useParams<{ serverId: string }>();
 
   const { showSnackbar } = useSnackbar();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Get the notification preference for this server
+  const channelPref =
+    useSelector((state: RootState) =>
+      selectedServer.id
+        ? state.notification.preferences[selectedServer.id]
+        : 'all'
+    ) || 'all';
+
+  // Retrieve notifications from context.
+  const { notifications } = useNotifications();
 
   const permissionSet = new Set(
     permissions.map((permission) => permission.name)
@@ -68,16 +78,15 @@ const ServerDetail: React.FC = () => {
     const fetchData = async () => {
       if (selectedServer.id !== serverId) {
         try {
-          axiosInstance.get(`/servers/${serverId}`).then((response) => {
-            dispatch(
-              selectServer({
-                id: response.data.server.id,
-                name: response.data.server.name,
-              })
-            );
-          });
+          const response = await axiosInstance.get(`/servers/${serverId}`);
+          dispatch(
+            selectServer({
+              id: response.data.server.id,
+              name: response.data.server.name,
+            })
+          );
         } catch (error) {
-          console.error('Error fetching categories', error);
+          console.error('Error fetching server data', error);
           navigate('/home');
         }
       }
@@ -85,8 +94,8 @@ const ServerDetail: React.FC = () => {
     const loadPermissions = async () => {
       if (permissionSet.size === 0) {
         try {
-          const permissions = await fetchPermissions(serverId);
-          if (permissions) dispatch(setPermissions(permissions));
+          const perms = await fetchPermissions(serverId);
+          if (perms) dispatch(setPermissions(perms));
         } catch (error) {
           console.error(error);
           showSnackbar('Error loading permissions', 'error');
@@ -97,7 +106,6 @@ const ServerDetail: React.FC = () => {
     loadPermissions();
     fetchData();
     fetchCategories();
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedServer.id]);
 
@@ -107,27 +115,22 @@ const ServerDetail: React.FC = () => {
       const fetchedCategories = response.data;
       setCategories(fetchedCategories);
 
-      // Initialize an array to accumulate channels for all categories
       const allChannels: {
         [key: string]: { description: string; id: string; name: string }[];
       } = {};
 
-      // Loop through the categories to fetch their channels
       for (let i = 0; i < fetchedCategories.length; i++) {
         const channelsResponse = await axiosInstance.get(
           `/channels/${serverId}/${fetchedCategories[i].id}`
         );
-
-        // Store channels for the current category in the allChannels object
         allChannels[fetchedCategories[i].id] = channelsResponse.data.map(
           (channel: { description: string; id: string; name: string }) => ({
             ...channel,
-            description: channel.description || '', // Add a default description if not present
+            description: channel.description || '',
           })
         );
       }
 
-      // Set the accumulated channels in the state
       setChannels(allChannels);
     } catch (error) {
       console.error('Error fetching categories', error);
@@ -136,11 +139,11 @@ const ServerDetail: React.FC = () => {
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories((prev) => {
-      const newExpandedCategories = new Set(prev);
-      newExpandedCategories.has(categoryId)
-        ? newExpandedCategories.delete(categoryId)
-        : newExpandedCategories.add(categoryId);
-      return newExpandedCategories;
+      const newExpanded = new Set(prev);
+      newExpanded.has(categoryId)
+        ? newExpanded.delete(categoryId)
+        : newExpanded.add(categoryId);
+      return newExpanded;
     });
   };
 
@@ -199,7 +202,9 @@ const ServerDetail: React.FC = () => {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className={`w-5 h-5 transition-transform ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
+            className={`w-5 h-5 transition-transform ${
+              isDropdownOpen ? 'rotate-180' : 'rotate-0'
+            }`}
           >
             <path
               strokeLinecap="round"
@@ -266,6 +271,7 @@ const ServerDetail: React.FC = () => {
           onCancel={() => setConfirmDialogOpen(false)}
           disable={isConfirmModalButtonDisable}
         />
+
         <div className="h-[calc(100%-104px)] overflow-auto">
           {categories.map((category) => (
             <div key={category.id} className="mb-5 mx-2">
@@ -279,7 +285,11 @@ const ServerDetail: React.FC = () => {
                   viewBox="0 0 24 24"
                   strokeWidth={1.0}
                   stroke="currentColor"
-                  className={`w-5 h-5 transition-transform ${expandedCategories.has(category.id) ? 'rotate-180' : 'rotate-90'}`}
+                  className={`w-5 h-5 transition-transform ${
+                    expandedCategories.has(category.id)
+                      ? 'rotate-180'
+                      : 'rotate-90'
+                  }`}
                 >
                   <path
                     strokeLinecap="round"
@@ -287,12 +297,12 @@ const ServerDetail: React.FC = () => {
                     d="M6 15l6-6 6 6"
                   />
                 </svg>
-                <span className="capitalize">{category.name}</span>
+                <span className="capitalize ml-1">{category.name}</span>
                 {(canManageChannels || canManageServer || owner) && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setNewChannelCategoryId(category.id); // Set category for new channel
+                      setNewChannelCategoryId(category.id);
                     }}
                     className="text-green-500 ml-auto"
                   >
@@ -301,43 +311,84 @@ const ServerDetail: React.FC = () => {
                 )}
               </div>
               <div
-                className={`overflow-hidden  transition-transform ${expandedCategories.has(category.id) ? 'max-h-screen' : 'max-h-0 '} `}
+                className={`overflow-hidden transition-transform ${
+                  expandedCategories.has(category.id)
+                    ? 'max-h-screen'
+                    : 'max-h-0'
+                }`}
               >
-                {channels[category.id]?.map((channel) => (
-                  <div
-                    key={channel.id}
-                    onClick={() => {
-                      const fullChannel = {
-                        ...channel,
-                        description: channel.description,
-                        members: [], // Add default or fetched members
-                        createdAt: new Date().toISOString(), // Add default or fetched createdAt
-                      };
-                      setSelectedChannel(fullChannel);
-                    }}
-                    className="pl-4 p-2 text-secondary text-sm dark:text-dark-text-secondary cursor-pointer   hover:text-red-100  hover:border-transparent transition-transform capitalize"
-                  >
-                    # {channel.name}
-                  </div>
-                ))}
+                {channels[category.id]?.map((channel) => {
+                  // Get channel-level notifications from the context.
+                  const channelNotification = selectedServer.id
+                    ? notifications[selectedServer.id]?.channels?.[channel.id]
+                    : undefined;
+                  const totalCount = channelNotification
+                    ? channelNotification.events.reduce(
+                        (count: number, event: any) => count + event.unread,
+                        0
+                      )
+                    : 0;
+                  const mentionCount = channelNotification
+                    ? channelNotification.events
+                        .filter((e: any) => e.type === 'mention')
+                        .slice(-1)[0]?.unread || 0
+                    : 0;
+                  // Determine which count to display based on the user's preference.
+                  let notificationCount = 0;
+                  if (channelPref === 'all') {
+                    notificationCount = totalCount;
+                  } else if (
+                    channelPref === 'mentions' ||
+                    channelPref === 'none'
+                  ) {
+                    notificationCount = mentionCount;
+                  }
+
+                  const highlightClass =
+                    totalCount > 0
+                      ? 'text-black font-bold dark:text-white'
+                      : '';
+
+                  return (
+                    <div
+                      key={channel.id}
+                      onClick={() => {
+                        const fullChannel = {
+                          ...channel,
+                          description: channel.description,
+                          members: [],
+                          createdAt: new Date().toISOString(),
+                        };
+                        dispatch(selectChannel(fullChannel));
+                      }}
+                      className={`relative pl-4 p-2 text-secondary text-sm dark:text-dark-text-secondary cursor-pointer transition-transform capitalize`}
+                    >
+                      <span className={highlightClass}># {channel.name}</span>
+                      {/* Render notification badge if count > 0 */}
+                      {notificationCount > 0 && (
+                        <span className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">
+                          {notificationCount}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}
         </div>
         <UserBar />
       </div>
-      {selectedChannel && (
+      {selectedChannel.id && (
         <div className="flex-grow">
-          <ChannelChat channel={selectedChannel} />
+          <ChannelChat channel={selectedChannel} server={selectedServer} />
         </div>
       )}
-      {
-        <CreateChannelModal
-          newChannelCategoryId={newChannelCategoryId}
-          handleCreateChannel={createChannel}
-          setNewChannelCategoryId={setNewChannelCategoryId}
-        />
-      }
+      <CreateChannelModal
+        newChannelCategoryId={newChannelCategoryId}
+        handleCreateChannel={createChannel}
+        setNewChannelCategoryId={setNewChannelCategoryId}
+      />
     </div>
   );
 };

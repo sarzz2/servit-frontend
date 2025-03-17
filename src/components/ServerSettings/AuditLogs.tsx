@@ -71,7 +71,6 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ server }) => {
     // Use refs to get the latest loading and hasMore values.
     if (loadingRef.current || !hasMoreRef.current) return;
     setLoading(true);
-    console.log(filters);
     try {
       const response = await axiosInstance.get(
         `/servers/audit_logs/${server.id}`,
@@ -86,12 +85,10 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ server }) => {
           },
         }
       );
-      console.log(response);
       const newLogs: AuditLog[] = response.data.logs;
       setLogs((prevLogs) => [...prevLogs, ...newLogs]);
       if (newLogs.length < filters.per_page) {
         setHasMore(false);
-        console.log('more false');
       } else {
         setPage(pageToFetch + 1);
       }
@@ -129,7 +126,6 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ server }) => {
     setLogs([]);
     setPage(1);
     setHasMore(true);
-    console.log(eventType);
     setFilters((prev) => ({
       ...prev,
       start_time: startDate ? startDate.toISOString().split('T')[0] : '',

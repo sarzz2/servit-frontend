@@ -58,7 +58,6 @@ const ChatWindow = ({
 
     const handleMessage = (event: MessageEvent) => {
       const received = JSON.parse(event.data);
-      console.log(received);
 
       // Handle historical messages (array)
       if (Array.isArray(received)) {
@@ -147,7 +146,6 @@ const ChatWindow = ({
 
       const olderMessages = response.data.messages;
       setPagingState(response.data.paging_state);
-      console.log(response);
       if (olderMessages?.length > 0) {
         setMessages((prev) => [...olderMessages.reverse(), ...prev]);
       }

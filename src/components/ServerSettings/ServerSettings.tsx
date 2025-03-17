@@ -5,6 +5,7 @@ import Overview from './Overview';
 import CategoriesAndChannels from './CategoriesAndChannels';
 import Roles from './Roles';
 import AuditLogs from './AuditLogs';
+import Notifications from './Notifications';
 
 const ServerSettings: React.FC = () => {
   const { serverId } = useParams<{ serverId: string }>();
@@ -34,6 +35,8 @@ const ServerSettings: React.FC = () => {
         return <Roles server={server} />;
       case 'audit-logs':
         return <AuditLogs server={server} />;
+      case 'notifications':
+        return <Notifications server={server} />;
       default:
         return <Overview server={server} setServer={setServer} />;
     }
@@ -83,6 +86,16 @@ const ServerSettings: React.FC = () => {
             onClick={() => setSelectedSetting('audit-logs')}
           >
             Audit Logs
+          </li>
+          <li
+            className={`py-2 px-4 hover:bg-hover-bg dark:hover:bg-dark-hover cursor-pointer rounded-lg mb-2 ${
+              selectedSetting === 'notifications'
+                ? 'bg-hover-bg dark:bg-dark-hover'
+                : ''
+            }`}
+            onClick={() => setSelectedSetting('notifications')}
+          >
+            Notifications
           </li>
         </ul>
       </aside>

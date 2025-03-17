@@ -261,6 +261,7 @@ const CategoriesAndChannels: React.FC<CategoriesAndChannelsProps> = ({
             name: server.name,
             server_picture_url: server.server_picture_url,
             invite_code: server.invite_code,
+            default_notification_setting: server.default_notification_setting,
           }}
           onCategoryCreated={fetchCategories}
         />

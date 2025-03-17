@@ -81,7 +81,6 @@ const Roles: React.FC<RolesProps> = ({ server }) => {
   };
 
   const handleSelectedRole = (value: string) => {
-    console.log(value);
     setSelectedRoleId(value);
   };
 
@@ -108,6 +107,7 @@ const Roles: React.FC<RolesProps> = ({ server }) => {
             name: server.name,
             server_picture_url: server.server_picture_url,
             invite_code: server.invite_code,
+            default_notification_setting: server.default_notification_setting,
           }}
           onRoleCreated={fetchRoles}
           initialData={{
@@ -178,6 +178,8 @@ const Roles: React.FC<RolesProps> = ({ server }) => {
                     name: server.name,
                     server_picture_url: server.server_picture_url,
                     invite_code: server.invite_code,
+                    default_notification_setting:
+                      server.default_notification_setting,
                   }}
                   onRoleCreated={fetchRoles}
                   initialData={{

@@ -3,4 +3,5 @@ export interface Server {
   name: string;
   server_picture_url: string | null;
   invite_code: string;
+  default_notification_setting: string;
 }
